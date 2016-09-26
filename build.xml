@@ -9,6 +9,7 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="CompiladorLA" default="default" basedir=".">
     <description>Builds, tests, and runs the project CompiladorLA.</description>
+    <property name="lib.antlr" value="lib/antlr-4.5.3-complete.jar" />
     <import file="nbproject/build-impl.xml"/>
     <!--
 
