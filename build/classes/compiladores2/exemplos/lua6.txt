@@ -1,3 +1,0 @@
-do
-   local oldprint = print; -- Grava a variavel print em oldprint
-end
