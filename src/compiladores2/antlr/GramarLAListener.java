@@ -1,4 +1,4 @@
-// Generated from GramarLA.g4 by ANTLR 4.5.3
+// Generated from /home/lucas/Documents/bcc/2016/2sem/CC2/Compiladores2/src/compiladores2/antlr/GramarLA.g4 by ANTLR 4.5.3
 package compiladores2.antlr;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 

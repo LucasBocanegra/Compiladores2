@@ -1,4 +1,4 @@
-// Generated from GramarLA.g4 by ANTLR 4.5.3
+// Generated from /home/lucas/Documents/bcc/2016/2sem/CC2/Compiladores2/src/compiladores2/antlr/GramarLA.g4 by ANTLR 4.5.3
 package compiladores2.antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -98,6 +98,11 @@ public class GramarLAParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitPrograma(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitPrograma(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ProgramaContext programa() throws RecognitionException {
@@ -149,6 +154,11 @@ public class GramarLAParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitExpressao(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitExpressao(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -220,6 +230,11 @@ public class GramarLAParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitTermo(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitTermo(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TermoContext termo() throws RecognitionException {
@@ -281,6 +296,11 @@ public class GramarLAParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitFator(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitFator(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FatorContext fator() throws RecognitionException {
@@ -337,6 +357,11 @@ public class GramarLAParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitOp1(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitOp1(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Op1Context op1() throws RecognitionException {
@@ -378,6 +403,11 @@ public class GramarLAParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof GramarLAListener ) ((GramarLAListener)listener).exitOp2(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof GramarLAVisitor ) return ((GramarLAVisitor<? extends T>)visitor).visitOp2(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

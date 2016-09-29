@@ -25,6 +25,7 @@ fator returns [int count]:
         NUM {$count = 0;}
 ;
 
+
 op1:
        '+' | '-'
 ;
