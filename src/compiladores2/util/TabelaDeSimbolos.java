@@ -1,36 +1,50 @@
-package compiladores2.util;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package trabalho2;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author daniel
+ */
 public class TabelaDeSimbolos {
-    public static void limparTabela() {
-        getInstancia().tabela.clear();
+    private String escopo;
+    private List<EntradaTabelaDeSimbolos> simbolos;
+    
+    public TabelaDeSimbolos(String escopo) {
+        simbolos = new ArrayList<EntradaTabelaDeSimbolos>();
+        this.escopo = escopo;
     }
     
-    public static void adicionarSimbolo(String lexema, Tipo tipo) {
-        EntradaTabelaDeSimbolos etds = new EntradaTabelaDeSimbolos(lexema, tipo);
-        getInstancia().adicionarSimbolo(etds);
+    public void adicionarSimbolo(String nome, String tipo) {
+        simbolos.add(new EntradaTabelaDeSimbolos(nome,tipo));
     }
-
-  
-    private static TabelaDeSimbolos instancia;
-
-    private TabelaDeSimbolos() {
-        tabela = new ArrayList<EntradaTabelaDeSimbolos>();
-    }
-
-    private static TabelaDeSimbolos getInstancia() {
-        if (instancia == null) {
-            instancia = new TabelaDeSimbolos();
+    
+    public void adicionarSimbolos(List<String> nomes, String tipo) {
+        for(String s:nomes) {
+            simbolos.add(new EntradaTabelaDeSimbolos(s, tipo));
         }
-        return instancia;
     }
-    private List<EntradaTabelaDeSimbolos> tabela;
-
-    private void adicionarSimbolo(EntradaTabelaDeSimbolos etds) {
-        if (!tabela.contains(etds)) {
-            tabela.add(etds);
+    
+    public boolean existeSimbolo(String nome) {
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            if(etds.getNome().equals(nome)) {
+                return true;
+            }
         }
+        return false;
+    }
+    
+    @Override
+    public String toString() {
+        String ret = "Escopo: "+escopo;
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            ret += "\n   "+etds;
+        }
+        return ret;
     }
 }
