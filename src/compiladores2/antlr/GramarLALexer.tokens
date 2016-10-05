@@ -65,6 +65,7 @@ NUM_INT=64
 NUM_REAL=65
 CADEIA=66
 WS=67
+COMENTARIOS=68
 'algoritmo'=1
 'fim_algoritmo'=2
 'declare'=3
