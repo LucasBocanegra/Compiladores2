@@ -1,13 +1,10 @@
 package compiladores2;
 
-import compiladores2.antlr.GramarLALexer;
-import compiladores2.antlr.GramarLAParser;
-
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 
+import compiladores2.antlr.GrammarLALexer;
+import compiladores2.antlr.GrammarLAParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -22,9 +19,9 @@ public class Compiladores2 {
          ANTLRInputStream input = new ANTLRInputStream(
                  new FileInputStream("/home/lucas/Dropbox/bcc/2016/2sem/cc2/Compiladores2/src/compiladores2/casosDeTesteT1/arquivos_com_erros_sintaticos/entrada/1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt")
          );
-         GramarLALexer lexer = new GramarLALexer(input);
+         GrammarLALexer lexer = new GrammarLALexer(input);
          CommonTokenStream tokens = new CommonTokenStream(lexer);
-         GramarLAParser parser = new GramarLAParser(tokens);
+         GrammarLAParser parser = new GrammarLAParser(tokens);
          parser.programa();
     }
 }

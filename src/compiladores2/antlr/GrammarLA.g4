@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-grammar GramarLA;
+grammar GrammarLA;
 
 programa :
     declaracoes 'algoritmo' corpo 'fim_algoritmo';

@@ -8,6 +8,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+
+import compiladores2.ASemantico.TabelaDeSimbolos;
+import compiladores2.ASintatico.SaidaParser;
+import compiladores2.ASintatico.T1ErrorListener;
+import compiladores2.antlr.GrammarLALexer;
+import compiladores2.antlr.GrammarLAParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -16,8 +22,9 @@ public class Corrigir {
 
     // Especifique o caminho dos casos de teste.
     // Deve haver dois subdiretorios: entrada e saida
-    private final static String CAMINHO_CASOS_TESTE = "/home/daniel/Desktop/casosDeTesteT1/casosDeTesteSintatico";
-    
+    private final static String CAMINHO_CASOS_TESTE =
+            "/home/lucas/Dropbox/bcc/2016/2sem/cc2/Compiladores2/src/compiladores2/casosDeTesteT1/arquivos_com_erros_sintaticos";
+
     // As flags GERA e VERIFICA são de uso do professor
     // GERA = true significa que a saída vai ser gerada, sobrescrevendo qualquer
     // conteudo do subdiretorio saida
@@ -32,18 +39,18 @@ public class Corrigir {
     // A nota que você obtiver aqui será usada no cálculo de sua nota do trabalho
     
     public static void main(String[] args) throws IOException, RecognitionException {
-/*      File diretorioCasosTeste = new File(CAMINHO_CASOS_TESTE + "/entrada");
+        File diretorioCasosTeste = new File(CAMINHO_CASOS_TESTE + "/entrada");
         File[] casosTeste = diretorioCasosTeste.listFiles();
         int totalCasosTeste = casosTeste.length;
         int casosTesteErrados = 0;
         for (File casoTeste : casosTeste) {
 
             SaidaParser out = new SaidaParser();
-            TabelaDeSimbolos.limparTabela();
+//            TabelaDeSimbolos.limparTabela();
             ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(casoTeste));
-            LuaLexer lexer = new LuaLexer(input);
+            GrammarLALexer lexer = new GrammarLALexer(input);
             CommonTokenStream tokens = new CommonTokenStream(lexer);
-            LuaParser parser = new LuaParser(tokens);
+            GrammarLAParser parser = new GrammarLAParser(tokens);
             parser.addErrorListener(new T1ErrorListener(out));
 
             parser.programa();
@@ -52,7 +59,7 @@ public class Corrigir {
                 out.println("Fim da analise. Sem erros sintaticos.");
                 out.println("Tabela de simbolos:");
 
-                TabelaDeSimbolos.imprimirTabela(out);
+//                TabelaDeSimbolos.imprimirTabela(out);
                 System.err.print(out);
             } else {
                 out.println("Fim da analise. Com erros sintaticos.");
@@ -73,16 +80,16 @@ public class Corrigir {
 
                     pw.println("===========================");
                 }
-
-
                 pw.print(out);
                 pw.flush();
                 pw.close();
+
             } else {
+
                 File saidaCasoTeste = new File(CAMINHO_CASOS_TESTE + "/saida/" + casoTeste.getName());
                 FileReader fr = new FileReader(saidaCasoTeste);
                 StringReader sr = new StringReader(out.toString());
-                                
+
                 int charFr = -1;
                 int charSr = -1;
                 boolean passou = true;
@@ -107,11 +114,11 @@ public class Corrigir {
                 }
             }
         }
-        if(!GERA) {
-            double nota = ((double) (totalCasosTeste - casosTesteErrados) / totalCasosTeste) * 10.0d;
-            System.err.println("Nota = " + nota + " ("+LuaParser.grupo+")");
-        } else {
-            System.err.println("Gabarito gerado: "+LuaParser.grupo);
-        }*/
+//        if(!GERA) {
+//            double nota = ((double) (totalCasosTeste - casosTesteErrados) / totalCasosTeste) * 10.0d;
+//            System.err.println("Nota = " + nota + " ("+LuaParser.grupo+")");
+//        } else {
+//            System.err.println("Gabarito gerado: "+LuaParser.grupo);
+//        }
     }
 }
