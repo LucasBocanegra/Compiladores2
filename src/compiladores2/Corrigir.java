@@ -26,7 +26,6 @@ public class Corrigir {
     // Alunos: deixem ambas como "false"
     private final static boolean GERA = false;
     private final static boolean VERIFICA = false;
-
     
     // Descomente o método abaixo para testar
     // Obs: este é o mesmo método que será usado pelo professor na correção
