@@ -19,7 +19,7 @@ public class Compiladores2 {
          // Modifique-a para testar os demais exemplos
 
          ANTLRInputStream input = new ANTLRInputStream(
-                 new FileInputStream("/home/lucas/Dropbox/bcc/2016/2sem/cc2/Compiladores2/src/compiladores2/casosDeTesteT1/arquivos_com_erros_sintaticos/entrada/1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt")
+                 new FileInputStream("C:\\Users\\Gabriel Palomino\\OneDrive\\UFSCar\\6° Semestre\\CC II\\T1\\Compiladores2\\src\\compiladores2\\casosDeTesteT1\\arquivos_com_erros_sintaticos\\entrada\\1-algoritmo_2-2_apostila_LA_1_erro_linha_3_acusado_linha_10.txt")
          );
          SaidaParser out = new SaidaParser();
          GrammarLALexer lexer = new GrammarLALexer(input);
