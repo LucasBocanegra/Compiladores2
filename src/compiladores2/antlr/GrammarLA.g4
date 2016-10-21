@@ -59,11 +59,7 @@ tipo_estendido :
 valor_constante :
     'CADEIA' | 'NUM_INT' | 'NUM_REAL' | 'verdadeiro' | 'falso';
 
-//regra criada para retirar ambiguidade a esquerda
-registro : registro2;
-
-registro2 :
-    variavel mais_variaveis 'fim_registro' registro2 | ;
+registro : 'registro' variavel mais_variaveis 'fim_registro';
 
 declaracao_global :
     'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'
