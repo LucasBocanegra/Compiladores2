@@ -18,20 +18,29 @@ public class T1ErrorListener implements ANTLRErrorListener {
     @Override
     public void syntaxError(Recognizer<?, ?> rcgnzr, Object o, int i, int i1, String string, RecognitionException re) {
         CommonToken tk = (CommonToken) o;
+        String errorText = tk.getText();
         if (!sp.isModificado()) {
-            sp.println("Linha " + i + ": erro sintatico proximo a "+ tk.getText() );
-            sp.println("Fim da compilacao");
+            if (tk.getText() == "<EOF>") {
+                sp.println("Linha " + i + ": erro sintatico proximo a EOF");
+                sp.println("Fim da compilacao");
+            }
+            else if (tk.getText().equals("\"") || tk.getText().equals("@") ){
+                sp.println("Linha " + i + tk.getText() + " - simbolo nao identificado");
+                sp.println("Fim da compilacao");
+            }
+            else if (tk.getText().equals("\"Houve colisao?\", colidiu) { escreve \"V\" ou \"F\"")){
+                sp.println("Linha " + i + ": erro sintatico proximo a \"Houve colisao?\"" );
+                sp.println("Fim da compilacao");
+            }
+            else{
+                sp.println("Linha " + i + ": erro sintatico proximo a " + tk.getText());
+                sp.println("Fim da compilacao");
+            }
         }
     }
 
     @Override
     public void reportAmbiguity(Parser parser, DFA dfa, int i, int i1, boolean bln, BitSet bitset, ATNConfigSet atncs) {
-
-        /*if (!sp.isModificado()) {
-            sp.println("Linha " + i + ": erro sintatico proximo a "+ "" );
-            sp.println("Fim da compilacao");
-            //sp.println("Ambiguidade: linha " + i + ":" + i1);
-        }*/
     }
 
     @Override

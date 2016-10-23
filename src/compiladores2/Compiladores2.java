@@ -25,8 +25,11 @@ public class Compiladores2 {
          // Modifique-a para testar os demais exemplos
 
          File arquivo = new File(args[0]);
+         //String nomeArquivo = "10-algoritmo_2-4_apostila_LA_1_erro_linha_16.txt";
+         //File arquivo = new File("C:\\CC2\\casosDeTesteT1\\1.arquivos_com_erros_sintaticos\\entrada\\" + nomeArquivo);
          ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(arquivo));
          File saidaCasoTeste = new File(args[1]);
+         //File saidaCasoTeste = new File("C:\\test\\"+nomeArquivo);
          PrintWriter pw = new PrintWriter(new FileWriter(saidaCasoTeste));
 
          SaidaParser out = new SaidaParser();
