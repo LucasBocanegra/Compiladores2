@@ -27,11 +27,11 @@ public class T1ErrorListener implements ANTLRErrorListener {
     @Override
     public void reportAmbiguity(Parser parser, DFA dfa, int i, int i1, boolean bln, BitSet bitset, ATNConfigSet atncs) {
 
-        if (!sp.isModificado()) {
-            sp.println("Linha " + i + ": erro sintatico proximo a "+ "EOF" );
+        /*if (!sp.isModificado()) {
+            sp.println("Linha " + i + ": erro sintatico proximo a "+ "" );
             sp.println("Fim da compilacao");
             //sp.println("Ambiguidade: linha " + i + ":" + i1);
-        }
+        }*/
     }
 
     @Override
