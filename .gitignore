@@ -5,3 +5,5 @@
 /src/compiladores2/casosDeTesteT1/arquivos_com_erros_sintaticos/saida2/
 /src/compiladores2/antlr/*
 !/src/compiladores2/antlr/GrammarLA.g4
+/src/META-INF/
+/out/
