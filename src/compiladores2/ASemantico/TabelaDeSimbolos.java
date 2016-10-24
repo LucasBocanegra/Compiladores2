@@ -38,7 +38,18 @@ public class TabelaDeSimbolos {
         }
         return false;
     }
-    
+
+    //Verifica se na tabela de simbolos existe um simbolo com o nome X e tipo Y
+    public boolean existeSimboloComTipo(String nome, String tipo) {
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            if(etds.getNome().equals(nome) && etds.getTipo().equals(tipo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     @Override
     public String toString() {
         String ret = "Escopo: "+escopo;
