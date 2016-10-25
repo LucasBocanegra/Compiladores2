@@ -45,14 +45,39 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDeclaracao_local(GrammarLAParser.Declaracao_localContext ctx) {
+        if(ctx != null) {
+            TabelaDeSimbolos escopoAtual = pt.topo();
+            switch (ctx.dLocal) {
+                case 0:
+                    visitVariavel(ctx.variavel());
+                    break;
+                case 1:
+                    if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
+                        escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo_basico(ctx.tipo_basico()));
+                    }else{
+                        System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
+                    }
+                    visitValor_constante(ctx.valor_constante());
+                    break;
+                case 2:
+                    if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
+                        escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()));
+                    }else{
+                        System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return null;
+        /* FEITO PELO BOCA
         if(ctx.variavel() != null){
             visitVariavel(ctx.variavel());
         }else{
             TabelaDeSimbolos escopoAtual = pt.topo();
             //TODO terminar verificação caso const ou tipo
-        }
-
-        return null;
+        }*/
     }
 
     @Override
@@ -75,12 +100,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             }
             m = m.mais_var();
         }
+        //visitDimensao(ctx.dimensao());
 
         return null;
     }
 
     @Override
     public String visitMais_var(GrammarLAParser.Mais_varContext ctx) {
+        /*TODO: acho que toda a volta que vcs fizeram em variavel pra
+         * verificar se existia mais_var declarada poderia ter sido
+         * feito aqui... PS: parei aqui e preciso que verifiquem se
+         * o que eu fiz ta certo...*/
         return (ctx != null)? ctx.IDENT().toString() : null;
     }
 
