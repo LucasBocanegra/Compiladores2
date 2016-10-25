@@ -146,7 +146,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             }else{
                 System.out.println("Erro, já existe declarado uma variável com esse nome: "+m.IDENT().toString());
             }
-            m = ctx.mais_var().mais_var();
+            m = m.mais_var();
         }
 
         return null;
