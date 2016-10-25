@@ -17,7 +17,7 @@ declaracao_local :
 variavel :
     IDENT dimensao mais_var ':' tipo;
 
-mais_var :
+mais_var:
     ',' IDENT dimensao mais_var | ;
 
 identificador :

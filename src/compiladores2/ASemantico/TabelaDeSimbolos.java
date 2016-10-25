@@ -29,7 +29,8 @@ public class TabelaDeSimbolos {
             simbolos.add(new EntradaTabelaDeSimbolos(s, tipo));
         }
     }
-    
+
+    //procura o simbolo em todos os escopos, começando do atual para os mais geral até chegar no global
     public boolean existeSimbolo(String nome) {
         for(EntradaTabelaDeSimbolos etds:simbolos) {
             if(etds.getNome().equals(nome)) {
