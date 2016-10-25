@@ -55,27 +55,11 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     @Override
     public String visitCmd(GrammarLAParser.CmdContext ctx) {
         if(ctx != null){
-            switch (ctx.getStart().getText()){
-                case "leia(":
+            switch(ctx.tipoCmd) {
+                case 0:
                     visitIdentificador(ctx.identificador());
                     //TODO implementar mais_ident depois
                     visitMais_ident(ctx.mais_ident());
-                    break;
-                case "escreva(":
-                    //Todo implementar escreva
-                    break;
-                case "se":
-                    //TODO implementar se
-                    break;
-                case "para":
-                    break;
-                case "enquanto":
-                    break;
-                case "faca":
-                    break;
-                case "^":
-                    break;
-                case "retorne":
                     break;
                 default:
                     break;

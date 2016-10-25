@@ -81,18 +81,18 @@ corpo:
 comandos:
     cmd comandos | ;
 
-cmd:
-    'leia(' identificador mais_ident ')'
-    | 'escreva(' expressao mais_expressao ')'
-    | 'se' expressao 'entao' comandos senao_opcional 'fim_se'
-    | 'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso'
-    | 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para'
-    | 'enquanto' expressao 'faca' comandos 'fim_enquanto'
-    | 'faca' comandos 'ate' expressao
-    | '^' IDENT outros_ident dimensao '<-' expressao
-    | IDENT chamada_atribuicao
-    | 'retorne' expressao;
-
+cmd returns [ int tipoCmd ]:
+    'leia' '(' identificador mais_ident ')' { $tipoCmd = 0; }
+    | 'escreva' '(' expressao mais_expressao ')' { $tipoCmd = 1; }
+    | 'se' expressao 'entao' comandos senao_opcional 'fim_se' { $tipoCmd = 2; }
+    | 'caso' exp_aritmetica 'seja' selecao senao_opcional 'fim_caso' { $tipoCmd = 3; }
+    | 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' comandos 'fim_para' { $tipoCmd = 4; }
+    | 'enquanto' expressao 'faca' comandos 'fim_enquanto' { $tipoCmd = 5; }
+    | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
+    | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
+    | IDENT chamada_atribuicao { $tipoCmd = 8; }
+    | 'retorne' expressao { $tipoCmd = 9; }
+;
 mais_expressao:
     ',' expressao mais_expressao | ;
 
