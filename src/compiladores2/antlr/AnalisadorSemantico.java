@@ -12,13 +12,14 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitPrograma(GrammarLAParser.ProgramaContext ctx) {
-            //criação escopo global
-            pt = new PilhaDeTabelas();
-            pt.empilhar(new TabelaDeSimbolos("global"));
+        //criação escopo global
+        pt = new PilhaDeTabelas();
+        pt.empilhar(new TabelaDeSimbolos("global"));
 
-            visitDeclaracoes(ctx.declaracoes());
-            visitCorpo(ctx.corpo());
-            return null;
+        visitDeclaracoes(ctx.declaracoes());
+        visitCorpo(ctx.corpo());
+        System.out.println("Fim da compilacao");
+        return null;
     }
 
     @Override
@@ -38,6 +39,56 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         if(ctx.comandos() != null){
             //TODO implementar visitor comandos
             visitComandos(ctx.comandos());
+        }
+        return null;
+    }
+
+    @Override
+    public String visitComandos(GrammarLAParser.ComandosContext ctx) {
+        if (ctx != null){
+            visitCmd(ctx.cmd());
+            visitComandos(ctx.comandos());
+        }
+        return null;
+    }
+
+    @Override
+    public String visitCmd(GrammarLAParser.CmdContext ctx) {
+        if(ctx != null){
+            switch (ctx.getStart().getText()){
+                case "leia(":
+                    visitIdentificador(ctx.identificador());
+                    //TODO implementar mais_ident depois
+                    visitMais_ident(ctx.mais_ident());
+                    break;
+                case "escreva(":
+                    //Todo implementar escreva
+                    break;
+                case "se":
+                    //TODO implementar se
+                    break;
+                case "para":
+                    break;
+                case "enquanto":
+                    break;
+                case "faca":
+                    break;
+                case "^":
+                    break;
+                case "retorne":
+                    break;
+                default:
+                    break;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitIdentificador(GrammarLAParser.IdentificadorContext ctx) {
+        TabelaDeSimbolos escopoAtual = pt.topo();
+        if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
+            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
         }
         return null;
     }
@@ -128,7 +179,11 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitTipo_basico_ident(GrammarLAParser.Tipo_basico_identContext ctx) {
-        if(ctx.IDENT() != null){
+        //eh um tipo básico
+        if(ctx.tipo_basico() != null){
+            return visitTipo_basico(ctx.tipo_basico());
+        //eh um tipo criado (declaracao de tipo)
+        }else{
             TabelaDeSimbolos escopoAtual = pt.topo();
             //se o Tipo existe na tabela de símbolos ou seja, se o simbolo ja foi declarado
             if(escopoAtual.existeSimbolo(ctx.IDENT().toString())){
@@ -137,20 +192,19 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 return ctx.IDENT().toString();
             }else{
                 //TODO melhorar mensagem de saida
-                System.out.println("Linha com erro, tipo não existente: "+ctx.IDENT().toString());
+                System.out.println("Linha "+ctx.getStart().getLine()+": tipo "+ctx.IDENT().toString()+" nao declarado");
                 return null;
             }
-        }else{
-           return visitTipo_basico(ctx.tipo_basico());
         }
     }
 
     @Override
     public String visitTipo_basico(GrammarLAParser.Tipo_basicoContext ctx) {
-        if(ctx.toString().equals("literal") || ctx.toString().equals("inteiro")
-            || ctx.toString().equals("real") || ctx.toString().equals("logico")){
-            return ctx.toString();
+        if(ctx.getText().equals("literal") || ctx.getText().equals("inteiro")
+            || ctx.getText().equals("real") || ctx.getText().equals("logico")){
+            return ctx.getText();
         }else{
+            //TODO melhorar mensagem de saida
             System.out.println("Erro, tipo declarado não compatível com tipo básico");
             return null;
         }
