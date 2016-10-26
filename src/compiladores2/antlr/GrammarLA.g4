@@ -151,12 +151,13 @@ outros_fatores:
 parcela:
     op_unario parcela_unario | parcela_nao_unario;
 
-parcela_unario:
-    '^' IDENT outros_ident dimensao
-    | IDENT chamada_partes
-    | NUM_INT
-    | NUM_REAL
-    | '(' expressao ')';
+parcela_unario returns[int tipoParcela]:
+    '^' IDENT outros_ident dimensao {$tipoParcela = 0;}
+    | IDENT chamada_partes{$tipoParcela = 1;}
+    | NUM_INT{$tipoParcela = 2;}
+    | NUM_REAL{$tipoParcela = 3;}
+    | '(' expressao ')'{$tipoParcela = 4;}
+    ;
 
 parcela_nao_unario:
     '&' IDENT outros_ident dimensao | CADEIA;

@@ -327,6 +327,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         return null;
     }
 
+
     @Override
     public String visitMais_expressao(GrammarLAParser.Mais_expressaoContext ctx) {
         if(ctx.children != null){
@@ -383,84 +384,15 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitOp_unario(GrammarLAParser.Op_unarioContext ctx) {
-        return super.visitOp_unario(ctx);
-    }
-
-    @Override
-    public String visitExp_aritmetica(GrammarLAParser.Exp_aritmeticaContext ctx) {
+        if(ctx.children != null){
+            if(ctx.getText().equals("-")){
+                return ctx.getText();
+            }
+            else{
+                return null;
+            }
+        }
         return null;
-    }
-
-    @Override
-    public String visitOp_multiplicacao(GrammarLAParser.Op_multiplicacaoContext ctx) {
-        return super.visitOp_multiplicacao(ctx);
-    }
-
-    @Override
-    public String visitOp_adicao(GrammarLAParser.Op_adicaoContext ctx) {
-        return super.visitOp_adicao(ctx);
-    }
-
-    @Override
-    public String visitTermo(GrammarLAParser.TermoContext ctx) {
-        return super.visitTermo(ctx);
-    }
-
-    @Override
-    public String visitOutros_termos(GrammarLAParser.Outros_termosContext ctx) {
-        return super.visitOutros_termos(ctx);
-    }
-
-    @Override
-    public String visitFator(GrammarLAParser.FatorContext ctx) {
-        return super.visitFator(ctx);
-    }
-
-    @Override
-    public String visitOutros_fatores(GrammarLAParser.Outros_fatoresContext ctx) {
-        return super.visitOutros_fatores(ctx);
-    }
-
-    @Override
-    public String visitParcela(GrammarLAParser.ParcelaContext ctx) {
-        return super.visitParcela(ctx);
-    }
-
-    @Override
-    public String visitParcela_unario(GrammarLAParser.Parcela_unarioContext ctx) {
-        return super.visitParcela_unario(ctx);
-    }
-
-    @Override
-    public String visitParcela_nao_unario(GrammarLAParser.Parcela_nao_unarioContext ctx) {
-        return super.visitParcela_nao_unario(ctx);
-    }
-
-    @Override
-    public String visitOutras_parcelas(GrammarLAParser.Outras_parcelasContext ctx) {
-        return super.visitOutras_parcelas(ctx);
-    }
-
-    @Override
-    public String visitChamada_partes(GrammarLAParser.Chamada_partesContext ctx) {
-        return super.visitChamada_partes(ctx);
-    }
-
-    @Override
-    public String visitExp_relacional(GrammarLAParser.Exp_relacionalContext ctx) {
-        visitExp_aritmetica(ctx.exp_aritmetica());
-        visitOp_opcional(ctx.op_opcional());
-        return null;
-    }
-
-    @Override
-    public String visitOp_opcional(GrammarLAParser.Op_opcionalContext ctx) {
-        return super.visitOp_opcional(ctx);
-    }
-
-    @Override
-    public String visitOp_relacional(GrammarLAParser.Op_relacionalContext ctx) {
-        return super.visitOp_relacional(ctx);
     }
 
     @Override
@@ -472,7 +404,184 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     }
 
     @Override
+    public String visitExp_aritmetica(GrammarLAParser.Exp_aritmeticaContext ctx) {
+        visitTermo(ctx.termo());
+        visitOutros_termos(ctx.outros_termos());
+        return null;
+    }
+
+    @Override
+    public String visitOp_multiplicacao(GrammarLAParser.Op_multiplicacaoContext ctx) {
+        return super.visitOp_multiplicacao(ctx);
+    }
+
+    @Override
+    public String visitOp_adicao(GrammarLAParser.Op_adicaoContext ctx) {
+
+        if(ctx.children != null){
+            if(ctx.getText().equals("+") || ctx.getText().equals("-")){
+                return ctx.getText();
+            }
+            else{
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitTermo(GrammarLAParser.TermoContext ctx) {
+        visitFator(ctx.fator());
+        visitOutros_fatores(ctx.outros_fatores());
+        return null;
+    }
+
+    @Override
+    public String visitOutros_termos(GrammarLAParser.Outros_termosContext ctx) {
+        if(ctx.children != null){
+            if(ctx.op_adicao() != null){
+                visitOp_adicao(ctx.op_adicao());
+                visitTermo(ctx.termo());
+                visitOutros_termos(ctx.outros_termos());
+            }else{
+                return null;
+            }
+        }
+
+
+        return null;
+    }
+
+    @Override
+    public String visitFator(GrammarLAParser.FatorContext ctx) {
+        visitParcela(ctx.parcela());
+        visitOutras_parcelas(ctx.outras_parcelas());
+        return null;
+    }
+
+    @Override
+    public String visitOutros_fatores(GrammarLAParser.Outros_fatoresContext ctx) {
+        if(ctx.children != null){
+            if(ctx.op_multiplicacao() != null){
+                visitOp_multiplicacao(ctx.op_multiplicacao());
+                visitFator(ctx.fator());
+            }else{
+                return null;
+            }
+        }
+        return super.visitOutros_fatores(ctx);
+    }
+
+    @Override
+    public String visitParcela(GrammarLAParser.ParcelaContext ctx) {
+        if(ctx.children != null) {
+            if (ctx.parcela_nao_unario() == null) {
+                visitOp_unario(ctx.op_unario());
+                visitParcela_unario(ctx.parcela_unario());
+            } else {
+                visitParcela_nao_unario(ctx.parcela_nao_unario());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitParcela_unario(GrammarLAParser.Parcela_unarioContext ctx) {
+        if(ctx.children != null){
+            TabelaDeSimbolos escopoAtual = pt.topo();
+            switch (ctx.tipoParcela){
+                case 0:
+                    visitOutros_ident(ctx.outros_ident());
+                    visitDimensao(ctx.dimensao());
+                    break;
+                case 1:
+                    if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
+                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                    }
+                    visitChamada_partes(ctx.chamada_partes());
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                default:
+                    break;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitParcela_nao_unario(GrammarLAParser.Parcela_nao_unarioContext ctx) {
+        return super.visitParcela_nao_unario(ctx);
+    }
+
+    @Override
+    public String visitOutras_parcelas(GrammarLAParser.Outras_parcelasContext ctx) {
+        if(ctx.children != null){
+            if(ctx.parcela() != null) {
+                visitParcela(ctx.parcela());
+                visitOutras_parcelas(ctx.outras_parcelas());
+            }else{
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitChamada_partes(GrammarLAParser.Chamada_partesContext ctx) {
+        if(ctx.children != null){
+            if(ctx.expressao() != null){
+                visitExpressao(ctx.expressao());
+                visitMais_expressao(ctx.mais_expressao());
+            }
+            else if(ctx.outros_ident() != null){
+                visitOutros_ident(ctx.outros_ident());
+                visitDimensao(ctx.dimensao());
+            }
+            else{
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitExp_relacional(GrammarLAParser.Exp_relacionalContext ctx) {
+        visitExp_aritmetica(ctx.exp_aritmetica());
+        visitOp_opcional(ctx.op_opcional());
+        return null;
+    }
+
+    @Override
+    public String visitOp_opcional(GrammarLAParser.Op_opcionalContext ctx) {
+        if(ctx.children != null){
+            if(ctx.op_relacional() != null){
+                visitOp_relacional(ctx.op_relacional());
+                visitExp_aritmetica(ctx.exp_aritmetica());
+            }else{
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String visitOp_relacional(GrammarLAParser.Op_relacionalContext ctx) {
+        return super.visitOp_relacional(ctx);
+    }
+
+    @Override
     public String visitOp_nao(GrammarLAParser.Op_naoContext ctx) {
+        if(ctx.children != null){
+            if(ctx.getText().equals("nao")){
+                return ctx.getText();
+            }
+        }
         return null;
     }
 
