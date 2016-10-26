@@ -10,9 +10,9 @@ decl_local_global :
     declaracao_local | declaracao_global;
 
 declaracao_local returns [int dLocal]:
-    'declare' variavel {$dLocal = 0}
-    | 'constante' IDENT ':' tipo_basico '=' valor_constante {$dLocal = 1}
-    | 'tipo'IDENT ':' tipo {$dLocal = 2}
+    'declare' variavel {$dLocal = 0;}
+    | 'constante' IDENT ':' tipo_basico '=' valor_constante {$dLocal = 1;}
+    | 'tipo'IDENT ':' tipo {$dLocal = 2;}
     ;
 
 variavel :

@@ -107,35 +107,49 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitMais_var(GrammarLAParser.Mais_varContext ctx) {
-        /*TODO: acho que toda a volta que vcs fizeram em variavel pra
+        /* Acho que toda a volta que vcs fizeram em variavel pra
          * verificar se existia mais_var declarada poderia ter sido
-         * feito aqui... PS: parei aqui e preciso que verifiquem se
-         * o que eu fiz ta certo...*/
+         * feito aqui... */
+
+
         return (ctx != null)? ctx.IDENT().toString() : null;
     }
 
     @Override
     public String visitIdentificador(GrammarLAParser.IdentificadorContext ctx) {
         TabelaDeSimbolos escopoAtual = pt.topo();
+        visitPonteiros_opcionais(ctx.ponteiros_opcionais());
         if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
             System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
         }
+        visitDimensao(ctx.dimensao());
+        visitOutros_ident(ctx.outros_ident());
         return null;
     }
 
     @Override
     public String visitPonteiros_opcionais(GrammarLAParser.Ponteiros_opcionaisContext ctx) {
-        return super.visitPonteiros_opcionais(ctx);
+        if(ctx != null){
+            visitPonteiros_opcionais(ctx.ponteiros_opcionais());
+        }
+        return null;
     }
 
     @Override
     public String visitOutros_ident(GrammarLAParser.Outros_identContext ctx) {
-        return super.visitOutros_ident(ctx);
+        if(ctx != null){
+            visitIdentificador(ctx.identificador());
+        }
+        return null;
     }
 
     @Override
     public String visitDimensao(GrammarLAParser.DimensaoContext ctx) {
-        return super.visitDimensao(ctx);
+        if(ctx != null){
+            visitExp_aritmetica(ctx.exp_aritmetica());
+            visitDimensao(ctx.dimensao());
+        }
+        return null;
     }
 
     @Override
@@ -149,12 +163,20 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitMais_ident(GrammarLAParser.Mais_identContext ctx) {
-        return super.visitMais_ident(ctx);
+        if(ctx != null){
+            visitIdentificador(ctx.identificador());
+            visitMais_ident(ctx.mais_ident());
+        }
+        return null;
     }
 
     @Override
     public String visitMais_variaveis(GrammarLAParser.Mais_variaveisContext ctx) {
-        return super.visitMais_variaveis(ctx);
+        if(ctx != null){
+            visitVariavel(ctx.variavel());
+            visitMais_variaveis(ctx.mais_variaveis());
+        }
+        return null;
     }
 
     @Override
@@ -201,16 +223,18 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitValor_constante(GrammarLAParser.Valor_constanteContext ctx) {
-        return super.visitValor_constante(ctx);
+        return ctx.getText();
     }
 
     @Override
     public String visitRegistro(GrammarLAParser.RegistroContext ctx) {
         //TODO implementar registo
-        return "teste";
+        visitVariavel(ctx.variavel());
+        visitMais_variaveis(ctx.mais_variaveis());
+        return null;
 
     }
-
+    //TODO: Parei aqui, falta conferir o que eu ja fiz e continuar.
     @Override
     public String visitDeclaracao_global(GrammarLAParser.Declaracao_globalContext ctx) {
         return super.visitDeclaracao_global(ctx);
