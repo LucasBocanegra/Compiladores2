@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 
-import compiladores2.ASemantico.TabelaDeSimbolos;
 import compiladores2.ASintatico.SaidaParser;
 import compiladores2.ASintatico.T1ErrorListener;
 import compiladores2.antlr.GrammarLALexer;

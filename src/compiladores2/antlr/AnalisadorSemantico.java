@@ -24,7 +24,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDeclaracoes(GrammarLAParser.DeclaracoesContext ctx) {
-        if(ctx !=  null){
+        if(ctx.children !=  null){
             visitDecl_local_global(ctx.decl_local_global());
             visitDeclaracoes(ctx.declaracoes());
         }
@@ -33,7 +33,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDecl_local_global(GrammarLAParser.Decl_local_globalContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             if(ctx.declaracao_local() != null){
                 visitDeclaracao_local(ctx.declaracao_local());
             }else{
@@ -45,7 +45,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDeclaracao_local(GrammarLAParser.Declaracao_localContext ctx) {
-        if(ctx != null) {
+        if(ctx.children != null) {
             TabelaDeSimbolos escopoAtual = pt.topo();
             switch (ctx.dLocal) {
                 case 0:
@@ -110,6 +110,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         /* Acho que toda a volta que vcs fizeram em variavel pra
          * verificar se existia mais_var declarada poderia ter sido
          * feito aqui... */
+        /*Não por que eu nao sei o tipo da variáveil em mais var*/
 
 
         return (ctx != null)? ctx.IDENT().toString() : null;
@@ -129,7 +130,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitPonteiros_opcionais(GrammarLAParser.Ponteiros_opcionaisContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitPonteiros_opcionais(ctx.ponteiros_opcionais());
         }
         return null;
@@ -137,7 +138,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitOutros_ident(GrammarLAParser.Outros_identContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitIdentificador(ctx.identificador());
         }
         return null;
@@ -145,7 +146,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDimensao(GrammarLAParser.DimensaoContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitExp_aritmetica(ctx.exp_aritmetica());
             visitDimensao(ctx.dimensao());
         }
@@ -163,7 +164,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitMais_ident(GrammarLAParser.Mais_identContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitIdentificador(ctx.identificador());
             visitMais_ident(ctx.mais_ident());
         }
@@ -172,7 +173,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitMais_variaveis(GrammarLAParser.Mais_variaveisContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitVariavel(ctx.variavel());
             visitMais_variaveis(ctx.mais_variaveis());
         }
@@ -262,7 +263,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitDeclaracoes_locais(GrammarLAParser.Declaracoes_locaisContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             if(ctx.declaracao_local() != null){
                 visitDeclaracao_local(ctx.declaracao_local());
             }
@@ -285,7 +286,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitComandos(GrammarLAParser.ComandosContext ctx) {
-        if (ctx != null){
+        if (ctx.children != null){
             visitCmd(ctx.cmd());
             visitComandos(ctx.comandos());
         }
@@ -328,7 +329,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitMais_expressao(GrammarLAParser.Mais_expressaoContext ctx) {
-        if(ctx != null){
+        if(ctx.children != null){
             visitExpressao(ctx.expressao());
             visitMais_expressao(ctx.mais_expressao());
         }
@@ -387,7 +388,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitExp_aritmetica(GrammarLAParser.Exp_aritmeticaContext ctx) {
-        return super.visitExp_aritmetica(ctx);
+        return null;
     }
 
     @Override
@@ -484,7 +485,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitOutros_termos_logicos(GrammarLAParser.Outros_termos_logicosContext ctx) {
-        if(ctx != null) {
+        if(ctx.children != null) {
             visitTermo_logico(ctx.termo_logico());
             visitOutros_termos_logicos(ctx.outros_termos_logicos());
         }
