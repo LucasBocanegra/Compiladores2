@@ -39,11 +39,14 @@ public class Compiladores2 {
          GrammarLAParser parser = new GrammarLAParser(tokens);
          parser.addErrorListener(new T1ErrorListener(out));
          GrammarLAParser.ProgramaContext context = parser.programa();
+
          pw.print(out.toString());
          pw.flush();
          pw.close();
 
          AnalisadorSemantico semantico = new AnalisadorSemantico();
          semantico.visitPrograma(context);
+
+
     }
 }

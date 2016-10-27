@@ -50,6 +50,14 @@ public class TabelaDeSimbolos {
         return false;
     }
 
+    public String getTipoSimbolo(String nome) {
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            if(etds.getNome().equals(nome)) {
+                return etds.getTipo();
+            }
+        }
+        return null;
+    }
 
     @Override
     public String toString() {
