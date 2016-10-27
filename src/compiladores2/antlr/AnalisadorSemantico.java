@@ -319,6 +319,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 case 7:
                     break;
                 case 8:
+                    //Todo armazenar IDENT
+                    visitChamada_atribuicao(ctx.chamada_atribuicao());
                     break;
                 default:
                     break;
@@ -344,7 +346,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitChamada_atribuicao(GrammarLAParser.Chamada_atribuicaoContext ctx) {
-        return super.visitChamada_atribuicao(ctx);
+        visitExpressao(ctx.expressao());
+        return null;
     }
 
     @Override
@@ -502,7 +505,10 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     visitChamada_partes(ctx.chamada_partes());
                     break;
                 case 2:
-                    break;
+                    System.out.println("cheguei aqui" + ctx.NUM_INT().toString() +" " +ctx.getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getParent().getText() );
+                    GrammarLAParser.Parcela_unarioContext m = ctx;
+                    //return "inteiro";
+                break;
                 case 3:
                     break;
                 case 4:
