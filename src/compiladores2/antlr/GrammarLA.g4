@@ -91,7 +91,7 @@ cmd returns [ int tipoCmd ]:
     | 'enquanto' expressao 'faca' comandos 'fim_enquanto' { $tipoCmd = 5; }
     | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
     | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
-    | IDENT chamada_atribuicao["undefined"] { $tipoCmd = 8; }
+    | IDENT chamada_atribuicao["undefined", "undefined"] { $tipoCmd = 8; }
     | 'retorne' expressao { $tipoCmd = 9; }
 ;
 mais_expressao:
@@ -100,8 +100,8 @@ mais_expressao:
 senao_opcional:
     'senao' comandos | ;
 
-chamada_atribuicao[String tipoAtribuicao]:
-    '(' argumentos_opcional ')' | outros_ident dimensao '<-' expressao;
+chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
+    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
 
 argumentos_opcional:
     expressao mais_expressao | ;
@@ -151,7 +151,8 @@ outros_fatores:
 parcela returns[String tipoSimbolo]:
     op_unario parcela_unario | parcela_nao_unario;
 
-parcela_unario returns[int tipoParcela, String tipoSimbolo]:
+parcela_unario returns[int tipoParcela, String tipoSimbolo]
+@init {$tipoSimbolo="undefined";} :
     '^' IDENT outros_ident dimensao {$tipoParcela = 0;}
     | IDENT chamada_partes{$tipoParcela = 1;}
     | NUM_INT{$tipoParcela = 2;}
@@ -162,7 +163,7 @@ parcela_unario returns[int tipoParcela, String tipoSimbolo]:
 parcela_nao_unario:
     '&' IDENT outros_ident dimensao | CADEIA;
 
-outras_parcelas:
+outras_parcelas returns[String tipoSimbolo]:
     '%' parcela outras_parcelas | ;
 
 chamada_partes:
@@ -171,16 +172,16 @@ chamada_partes:
 exp_relacional returns[String tipoSimbolo]:
     exp_aritmetica op_opcional;
 
-op_opcional:
+op_opcional returns[String tipoSimbolo]:
     op_relacional exp_aritmetica | ;
 
 op_relacional:
     '=' | '<>' | '>=' | '<=' | '>' | '<';
 
 expressao returns[String tipoSimbolo]:
-    termo_logico outros_termos_logicos;
+    t1=termo_logico t2=outros_termos_logicos;
 
-op_nao:
+op_nao returns[String tipoSimbolo]:
     'nao' | ;
 
 termo_logico returns[String tipoSimbolo]:
