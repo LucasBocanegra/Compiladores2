@@ -500,7 +500,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 return null;
             }
         }
-        return super.visitOutros_fatores(ctx);
+        return null;
     }
 
     @Override
@@ -514,6 +514,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
             } else {
                 visitParcela_nao_unario(ctx.parcela_nao_unario());
+                ctx.tipoSimbolo = ctx.parcela_nao_unario().tipoSimbolo;
             }
         }
         return null;
@@ -549,8 +550,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     ctx.tipoSimbolo=  "real";
                     break;
                 case 4:
-                    break;
-                default:
+                    visitExpressao(ctx.expressao());
+                    ctx.tipoSimbolo = ctx.expressao().tipoSimbolo;
                     break;
             }
         }
@@ -559,7 +560,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitParcela_nao_unario(GrammarLAParser.Parcela_nao_unarioContext ctx) {
-        return super.visitParcela_nao_unario(ctx);
+        if(ctx.tipoParcela == 0){
+            TabelaDeSimbolos escopoAtual = pt.topo();
+            if(escopoAtual.existeSimbolo(ctx.IDENT().toString())){
+                ctx.tipoSimbolo = escopoAtual.getTipoSimbolo(ctx.IDENT().toString());
+            }else{
+                System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+            }
+        }else if(ctx.tipoParcela == 1){
+            ctx.tipoSimbolo = "literal";
+        }
+        return null;
     }
 
     @Override
@@ -598,8 +609,11 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
         visitExp_aritmetica(ctx.exp_aritmetica());
         visitOp_opcional(ctx.op_opcional());
-
-        ctx.tipoSimbolo = setTipoSimbolo(ctx.exp_aritmetica().tipoSimbolo, ctx.op_opcional().tipoSimbolo);
+        if(ctx.op_opcional().tipoSimbolo.equals("undefined")){
+            ctx.tipoSimbolo = ctx.exp_aritmetica().tipoSimbolo;
+        }else{
+            ctx.tipoSimbolo = ctx.op_opcional().tipoSimbolo;
+        }
 
         return null;
     }
@@ -610,7 +624,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             if(ctx.op_relacional() != null){
                 visitOp_relacional(ctx.op_relacional());
                 visitExp_aritmetica(ctx.exp_aritmetica());
-                ctx.tipoSimbolo = ctx.exp_aritmetica().tipoSimbolo;
+                ctx.tipoSimbolo = ctx.op_relacional().tipoSimbolo;
             }else{
                 ctx.tipoSimbolo = "undefined";
                 return null;
@@ -623,13 +637,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitOp_relacional(GrammarLAParser.Op_relacionalContext ctx) {
-        return super.visitOp_relacional(ctx);
+        ctx.tipoSimbolo = "logico";
+        return ctx.getText();
     }
 
     @Override
     public String visitOp_nao(GrammarLAParser.Op_naoContext ctx) {
+        ctx.tipoSimbolo = "undefined";
+
         if(ctx.children != null){
             if(ctx.getText().equals("nao")){
+                ctx.tipoSimbolo = "logico";
                 return ctx.getText();
             }
         }
@@ -641,6 +659,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
         visitFator_logico(ctx.fator_logico());
         visitOutros_fatores_logicos(ctx.outros_fatores_logicos());
+
         ctx.tipoSimbolo = ctx.fator_logico().tipoSimbolo;
         return null;
     }
@@ -656,7 +675,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitOutros_fatores_logicos(GrammarLAParser.Outros_fatores_logicosContext ctx) {
-        return super.visitOutros_fatores_logicos(ctx);
+        return null;
     }
 
     @Override

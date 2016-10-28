@@ -160,8 +160,8 @@ parcela_unario returns[int tipoParcela, String tipoSimbolo]
     | '(' expressao ')'{$tipoParcela = 4;}
     ;
 
-parcela_nao_unario:
-    '&' IDENT outros_ident dimensao | CADEIA;
+parcela_nao_unario returns[String tipoSimbolo, int tipoParcela]:
+    '&' IDENT outros_ident dimensao {$tipoParcela = 0;} | CADEIA {$tipoParcela = 1;};
 
 outras_parcelas returns[String tipoSimbolo]:
     '%' parcela outras_parcelas | ;
@@ -175,7 +175,8 @@ exp_relacional returns[String tipoSimbolo]:
 op_opcional returns[String tipoSimbolo]:
     op_relacional exp_aritmetica | ;
 
-op_relacional:
+op_relacional returns[String tipoSimbolo]
+@init {$tipoSimbolo="undefined";} :
     '=' | '<>' | '>=' | '<=' | '>' | '<';
 
 expressao returns[String tipoSimbolo]:
