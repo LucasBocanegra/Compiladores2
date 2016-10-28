@@ -6,13 +6,10 @@ import compiladores2.antlr.GrammarLAParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
-import sun.awt.CharsetString;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -22,10 +19,10 @@ public class CorrigirSemanticos {
     // Especifique o caminho dos casos de teste.
     // Deve haver dois subdiretorios: entrada e saida
     private final static String CAMINHO_CASOS_TESTE =
-          "/home/lucas/Dropbox/bcc/2016/2sem/cc2/casosDeTesteT1/2.arquivos_com_erros_semanticos/teste";
+          "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/2.arquivos_com_erros_semanticos/teste";
 
     private final static String CAMINHO_CASOS_SAIDA =
-            "/home/lucas/Dropbox/bcc/2016/2sem/cc2/casosDeTesteT1/2.arquivos_com_erros_semanticos/saida";
+            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/2.arquivos_com_erros_semanticos/saida";
 
 
     public static void main(String[] args) throws IOException, RecognitionException, NullPointerException{

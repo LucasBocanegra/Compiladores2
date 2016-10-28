@@ -187,8 +187,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             return ctx.getText();
         }else{
             //TODO melhorar mensagem de saida
-            System.out.println("Erro, tipo declarado não compatível com tipo básico");
-            return null;
+            //System.out.println("Erro, tipo declarado não compatível com tipo básico");
+            return "undefined"; //tipo nao copativel
         }
     }
 
@@ -207,7 +207,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             }else{
                 //TODO melhorar mensagem de saida
                 System.out.println("Linha "+ctx.getStart().getLine()+": tipo "+ctx.IDENT().toString()+" nao declarado");
-                return null;
+                return "undefined"; //tipo nao existente de variavel
             }
         }
     }
@@ -306,6 +306,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     visitMais_expressao(ctx.mais_expressao());
                     break;
                 case 2:
+                    visitExpressao(ctx.expressao());
+                    visitComandos(ctx.comandos());
+                    visitSenao_opcional(ctx.senao_opcional());
                     break;
                 case 3:
                     break;
@@ -346,7 +349,10 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitSenao_opcional(GrammarLAParser.Senao_opcionalContext ctx) {
-        return super.visitSenao_opcional(ctx);
+        if (ctx.comandos() != null) {
+            visitComandos(ctx.comandos());
+        }
+        return null;
     }
 
     @Override
@@ -354,7 +360,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         visitExpressao(ctx.expressao());
 
         if(ctx.exp.tipoSimbolo.equals("error") || !ctx.tipoAtribuicao.equals(ctx.exp.tipoSimbolo)){
-            System.out.println("Linha "+ctx.getStart().getLine()+": atribuicao nao compativel para "+ctx.nameAtribuicao);
+            if( !(ctx.tipoAtribuicao.equals("real") && ctx.exp.tipoSimbolo.equals("inteiro"))) {
+                System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + ctx.nameAtribuicao);
+            }
         }
         return null;
     }
@@ -693,6 +701,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         if(ctx.exp_relacional() != null){
            visitExp_relacional(ctx.exp_relacional());
            ctx.tipoSimbolo = ctx.exp_relacional().tipoSimbolo;
+        }else{
+            ctx.tipoSimbolo = "logico";
         }
         return null;
     }
