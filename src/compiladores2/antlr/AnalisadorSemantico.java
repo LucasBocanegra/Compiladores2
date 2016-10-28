@@ -315,6 +315,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 case 4:
                     break;
                 case 5:
+                    visitExpressao(ctx.expressao());
                     break;
                 case 6:
                     break;
