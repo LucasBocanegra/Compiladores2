@@ -21,7 +21,13 @@ public class TabelaDeSimbolos {
     }
     
     public void adicionarSimbolo(String nome, String tipo) {
+
         simbolos.add(new EntradaTabelaDeSimbolos(nome,tipo));
+    }
+
+    public void adicionarSimbolo(String nome, String tipo, boolean ehPoteiro) {
+
+        simbolos.add(new EntradaTabelaDeSimbolos(nome,tipo, ehPoteiro));
     }
     
     public void adicionarSimbolos(List<String> nomes, String tipo) {
@@ -29,6 +35,7 @@ public class TabelaDeSimbolos {
             simbolos.add(new EntradaTabelaDeSimbolos(s, tipo));
         }
     }
+
 
     //procura o simbolo em todos os escopos, começando do atual para os mais geral até chegar no global
     public boolean existeSimbolo(String nome) {

@@ -91,7 +91,7 @@ cmd returns [ int tipoCmd ]:
     | 'enquanto' expressao 'faca' comandos 'fim_enquanto' { $tipoCmd = 5; }
     | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
     | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
-    | IDENT chamada_atribuicao["undefined", "undefined"] { $tipoCmd = 8; }
+    | IDENT chamada_atribuicao { $tipoCmd = 8; }
     | 'retorne' expressao { $tipoCmd = 9; }
 ;
 mais_expressao:
@@ -100,8 +100,8 @@ mais_expressao:
 senao_opcional:
     'senao' comandos | ;
 
-chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
-    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
+chamada_atribuicao returns [String tipoSimbolo ]:
+    '(' argumentos_opcional ')' | outros_ident dimensao '<-' expressao;
 
 argumentos_opcional:
     expressao mais_expressao | ;

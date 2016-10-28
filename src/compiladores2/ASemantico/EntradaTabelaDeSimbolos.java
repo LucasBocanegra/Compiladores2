@@ -10,10 +10,18 @@ package compiladores2.ASemantico;
  */
 public class EntradaTabelaDeSimbolos {
     private String nome, tipo;
+    private boolean  ehPonteiro;
     
     public EntradaTabelaDeSimbolos(String nome, String tipo) {
         this.nome = nome;
         this.tipo = tipo;
+        this.ehPonteiro = false;
+    }
+
+    public EntradaTabelaDeSimbolos(String nome, String tipo, boolean ehPonteiro) {
+        this.nome = nome;
+        this.tipo = tipo;
+        this.ehPonteiro = ehPonteiro;
     }
     
     public String getNome() {
