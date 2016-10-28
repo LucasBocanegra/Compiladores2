@@ -66,6 +66,15 @@ public class TabelaDeSimbolos {
         return null;
     }
 
+    public boolean ehPonteiro(String nome) {
+        for(EntradaTabelaDeSimbolos etds:simbolos) {
+            if(etds.getNome().equals(nome)) {
+                return etds.isEhPonteiro();
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         String ret = "Escopo: "+escopo;

@@ -48,10 +48,10 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         if(ctx.children != null) {
             TabelaDeSimbolos escopoAtual = pt.topo();
             switch (ctx.dLocal) {
-                case 0:
+                case 0: // se for variável
                     visitVariavel(ctx.variavel());
                     break;
-                case 1:
+                case 1: //se for constante
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
                         escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo_basico(ctx.tipo_basico()));
                     }else{
@@ -59,7 +59,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     }
                     visitValor_constante(ctx.valor_constante());
                     break;
-                case 2:
+                case 2: //se for tipo
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
                         escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()));
                     }else{
@@ -78,7 +78,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         TabelaDeSimbolos escopoAtual = pt.topo();
 
         if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
-            escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()));
+            escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()), ctx.tipo().ehPonteiro);
         }else{
             System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
         }
@@ -87,7 +87,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         GrammarLAParser.Mais_varContext m = ctx.mais_var();
         while (m.children != null){
             if(!escopoAtual.existeSimbolo(visitMais_var(m))){
-                escopoAtual.adicionarSimbolo(m.IDENT().toString(), visitTipo(ctx.tipo()));
+                escopoAtual.adicionarSimbolo(m.IDENT().toString(), visitTipo(ctx.tipo()),ctx.tipo().ehPonteiro);
             }else{
                 System.out.println("Linha "+ m.getStart().getLine() +": identificador "+ m.IDENT().toString() +" ja declarado anteriormente ");
             }
@@ -123,6 +123,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     public String visitPonteiros_opcionais(GrammarLAParser.Ponteiros_opcionaisContext ctx) {
         if(ctx.children != null){
             visitPonteiros_opcionais(ctx.ponteiros_opcionais());
+            ctx.ehPonteiro = true;
+        }else{
+            ctx.ehPonteiro = false;
         }
         return null;
     }
@@ -149,7 +152,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         if(ctx.registro() != null){
             return visitRegistro(ctx.registro());
         }else{
-            return visitTipo_estendido(ctx.tipo_estendido());
+            String r = visitTipo_estendido(ctx.tipo_estendido());
+            ctx.ehPonteiro = ctx.tipo_estendido().ehPonteiro;
+            return r;
         }
     }
 
@@ -207,6 +212,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     public String visitTipo_estendido(GrammarLAParser.Tipo_estendidoContext ctx) {
         if(ctx.ponteiros_opcionais() != null){
             visitPonteiros_opcionais(ctx.ponteiros_opcionais());
+            ctx.ehPonteiro = ctx.ponteiros_opcionais().ehPonteiro;
+        }else{
+            ctx.ehPonteiro = false;
         }
 
         return visitTipo_basico_ident(ctx.tipo_basico_ident());
@@ -285,6 +293,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitCmd(GrammarLAParser.CmdContext ctx) {
+        TabelaDeSimbolos escopoAtual = pt.topo();
         if(ctx != null){
             switch(ctx.tipoCmd) {
                 case 0:
@@ -311,9 +320,27 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 case 6:
                     break;
                 case 7:
+                    if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
+                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                    }else{
+                        String nameAtribuicao = ctx.IDENT().toString();
+                        String tipoAtribuicao = escopoAtual.getTipoSimbolo(ctx.IDENT().toString());
+
+                        if(escopoAtual.ehPonteiro(ctx.IDENT().toString())) {
+                            visitExpressao(ctx.expressao());
+                            String tipoSimbolo = ctx.expressao().tipoSimbolo;
+
+                            if(tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)){
+                                if( !(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
+                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para ^" + nameAtribuicao);
+                                }
+                            }
+                        }else{ // a variável atribuida nao eh ponteiro
+                            System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
+                        }
+                    }
                     break;
                 case 8:
-                    TabelaDeSimbolos escopoAtual = pt.topo();
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
                         System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                     }else{

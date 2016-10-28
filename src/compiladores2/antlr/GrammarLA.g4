@@ -24,7 +24,7 @@ mais_var:
 identificador :
     ponteiros_opcionais IDENT dimensao outros_ident;
 
-ponteiros_opcionais :
+ponteiros_opcionais returns [boolean ehPonteiro]:
     '^' ponteiros_opcionais | ;
 
 outros_ident :
@@ -33,7 +33,7 @@ outros_ident :
 dimensao :
     '[' exp_aritmetica ']' dimensao | ;
 
-tipo:
+tipo returns [boolean ehPonteiro]:
     registro | tipo_estendido;
 
 mais_ident:
@@ -48,7 +48,7 @@ tipo_basico:
 tipo_basico_ident:
     tipo_basico | IDENT;
 
-tipo_estendido:
+tipo_estendido returns [boolean ehPonteiro]:
     ponteiros_opcionais tipo_basico_ident;
 
 valor_constante:

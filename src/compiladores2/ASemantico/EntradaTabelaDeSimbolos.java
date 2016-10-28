@@ -31,7 +31,11 @@ public class EntradaTabelaDeSimbolos {
     public String getTipo() {
         return tipo;
     }
-    
+
+    public boolean isEhPonteiro() {
+        return ehPonteiro;
+    }
+
     @Override
     public String toString() {
         return nome+"("+tipo+")";
