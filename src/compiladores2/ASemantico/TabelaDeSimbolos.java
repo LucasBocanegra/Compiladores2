@@ -36,6 +36,25 @@ public class TabelaDeSimbolos {
         }
     }
 
+    /*
+    * Retorna a ultima posicao da tabela ocupada por um simbolo
+    * */
+    public int getUltimaPosicaoOcupada(){
+        return (simbolos.size()==0)? 0: simbolos.size()-1;
+    }
+
+    /*
+    * Editar o nome de um simbolo na posicao indicada. Retorna falso se a posicao não existe
+    * */
+    public boolean editarNomeSimbolo(int posicao, String novoNome){
+        if(posicao<simbolos.size()){
+            simbolos.get(posicao).setNome(novoNome);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 
     //procura o simbolo em todos os escopos, começando do atual para os mais geral até chegar no global
     public boolean existeSimbolo(String nome) {
@@ -64,6 +83,18 @@ public class TabelaDeSimbolos {
             }
         }
         return null;
+    }
+
+    /*
+    * Retorna o nome de um simbolo na posicao indicada. Retorna null se a posicao nao existe
+    * */
+    public String getNomeSimbolo(int posicao){
+       if(posicao<simbolos.size()){
+           String nome = simbolos.get(posicao).getNome();
+           return nome;
+       }else{
+           return null;
+       }
     }
 
     public boolean ehPonteiro(String nome) {

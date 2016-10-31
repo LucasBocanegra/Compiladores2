@@ -76,18 +76,45 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     @Override
     public String visitVariavel(GrammarLAParser.VariavelContext ctx) {
         TabelaDeSimbolos escopoAtual = pt.topo();
+        int posicaoAtual = 0;
+        String tipo = null;
 
         if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
-            escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()), ctx.tipo().ehPonteiro);
+            posicaoAtual = escopoAtual.getUltimaPosicaoOcupada();
+            tipo = visitTipo(ctx.tipo());
+
+            if(tipo.equals("registro")){
+                for (int k = posicaoAtual; k <= escopoAtual.getUltimaPosicaoOcupada();k++){
+                    String old = escopoAtual.getNomeSimbolo(k);
+                    if(old != null){
+                        escopoAtual.editarNomeSimbolo(k,ctx.IDENT().toString()+"."+old);
+                    }
+                }
+            }else {
+                escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
+            }
         }else{
             System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
         }
 
         //declara todas as mais_var com o tipo definido
+        //neste caso existe várias variáveis com o mesmo tipo
         GrammarLAParser.Mais_varContext m = ctx.mais_var();
         while (m.children != null){
             if(!escopoAtual.existeSimbolo(visitMais_var(m))){
-                escopoAtual.adicionarSimbolo(m.IDENT().toString(), visitTipo(ctx.tipo()),ctx.tipo().ehPonteiro);
+                if(tipo.equals("registro")) {
+                    int tamanho = escopoAtual.getUltimaPosicaoOcupada();
+                    for (int i = posicaoAtual; i <= tamanho; i++) {
+                        String nome = escopoAtual.getNomeSimbolo(i);
+                        String tipoSimbolo = escopoAtual.getTipoSimbolo(nome);
+                        if (nome != null) {
+                            nome = nome.replace(ctx.IDENT().toString(), m.IDENT().toString());
+                            escopoAtual.adicionarSimbolo(nome, tipoSimbolo, ctx.tipo().ehPonteiro);
+                        }
+                    }
+                }else{
+                    escopoAtual.adicionarSimbolo(m.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
+                }
             }else{
                 System.out.println("Linha "+ m.getStart().getLine() +": identificador "+ m.IDENT().toString() +" ja declarado anteriormente ");
             }
@@ -227,10 +254,9 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitRegistro(GrammarLAParser.RegistroContext ctx) {
-        //TODO implementar registo
         visitVariavel(ctx.variavel());
         visitMais_variaveis(ctx.mais_variaveis());
-        return null;
+        return "registro";
 
     }
     //TODO: Parei aqui, falta conferir o que eu ja fiz e continuar.

@@ -32,6 +32,18 @@ public class EntradaTabelaDeSimbolos {
         return tipo;
     }
 
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setEhPonteiro(boolean ehPonteiro) {
+        this.ehPonteiro = ehPonteiro;
+    }
+
     public boolean isEhPonteiro() {
         return ehPonteiro;
     }

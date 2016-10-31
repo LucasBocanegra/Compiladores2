@@ -201,7 +201,7 @@ parcela_logica returns[String tipoSimbolo, int tipoParcela]:
     'verdadeiro' {$tipoParcela = 0;} | 'falso' {$tipoParcela = 1;} | exp_relacional { $tipoParcela = 2;};
 
 IDENT:
-    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*;
+    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '.')*;
 
 NUM_INT:
     '0'..'9'+;
