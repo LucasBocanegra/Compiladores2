@@ -6,5 +6,6 @@
 /src/compiladores2/antlr/*
 !/src/compiladores2/antlr/GrammarLA.g4
 !/src/compiladores2/antlr/AnalisadorSemantico.java
+!/src/compiladores2/antlr/GeradorCodigo.java
 /src/META-INF/
 /out/
