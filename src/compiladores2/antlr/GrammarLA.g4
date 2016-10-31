@@ -91,7 +91,7 @@ cmd returns [ int tipoCmd ]:
     | 'enquanto' expressao 'faca' comandos 'fim_enquanto' { $tipoCmd = 5; }
     | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
     | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
-    | IDENT chamada_atribuicao { $tipoCmd = 8; }
+    | IDENT chamada_atribuicao["undefined", "undefined"] { $tipoCmd = 8; }
     | 'retorne' expressao { $tipoCmd = 9; }
 ;
 mais_expressao:
@@ -100,8 +100,8 @@ mais_expressao:
 senao_opcional:
     'senao' comandos | ;
 
-chamada_atribuicao:
-    '(' argumentos_opcional ')' | outros_ident dimensao '<-' expressao;
+chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
+    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
 
 argumentos_opcional:
     expressao mais_expressao | ;
@@ -127,7 +127,7 @@ intervalo_opcional:
 op_unario:
     '-' | ;
 
-exp_aritmetica:
+exp_aritmetica returns[String tipoSimbolo]:
     termo outros_termos;
 
 op_multiplicacao:
@@ -136,22 +136,23 @@ op_multiplicacao:
 op_adicao:
     '+' | '-';
 
-termo:
+termo returns[String tipoSimbolo] :
     fator outros_fatores;
 
-outros_termos:
+outros_termos returns[String tipoSimbolo]:
     op_adicao termo outros_termos | ;
 
-fator:
+fator returns[String tipoSimbolo]:
     parcela outras_parcelas;
 
 outros_fatores:
     op_multiplicacao fator outros_fatores | ;
 
-parcela:
+parcela returns[String tipoSimbolo]:
     op_unario parcela_unario | parcela_nao_unario;
 
-parcela_unario returns[int tipoParcela]:
+parcela_unario returns[int tipoParcela, String tipoSimbolo]
+@init {$tipoSimbolo="undefined";} :
     '^' IDENT outros_ident dimensao {$tipoParcela = 0;}
     | IDENT chamada_partes{$tipoParcela = 1;}
     | NUM_INT{$tipoParcela = 2;}
@@ -159,31 +160,32 @@ parcela_unario returns[int tipoParcela]:
     | '(' expressao ')'{$tipoParcela = 4;}
     ;
 
-parcela_nao_unario:
-    '&' IDENT outros_ident dimensao | CADEIA;
+parcela_nao_unario returns[String tipoSimbolo, int tipoParcela]:
+    '&' IDENT outros_ident dimensao {$tipoParcela = 0;} | CADEIA {$tipoParcela = 1;};
 
-outras_parcelas:
+outras_parcelas returns[String tipoSimbolo]:
     '%' parcela outras_parcelas | ;
 
 chamada_partes:
     '(' expressao mais_expressao ')' | outros_ident dimensao | ;
 
-exp_relacional:
+exp_relacional returns[String tipoSimbolo]:
     exp_aritmetica op_opcional;
 
-op_opcional:
+op_opcional returns[String tipoSimbolo]:
     op_relacional exp_aritmetica | ;
 
-op_relacional:
+op_relacional returns[String tipoSimbolo]
+@init {$tipoSimbolo="undefined";} :
     '=' | '<>' | '>=' | '<=' | '>' | '<';
 
-expressao:
-    termo_logico outros_termos_logicos;
+expressao returns[String tipoSimbolo]:
+    t1=termo_logico t2=outros_termos_logicos;
 
-op_nao:
+op_nao returns[String tipoSimbolo]:
     'nao' | ;
 
-termo_logico:
+termo_logico returns[String tipoSimbolo]:
     fator_logico outros_fatores_logicos;
 
 outros_termos_logicos:
@@ -192,11 +194,11 @@ outros_termos_logicos:
 outros_fatores_logicos:
     'e' fator_logico outros_fatores_logicos | ;
 
-fator_logico:
+fator_logico returns[String tipoSimbolo]:
     op_nao parcela_logica;
 
-parcela_logica:
-    'verdadeiro' | 'falso' | exp_relacional;
+parcela_logica returns[String tipoSimbolo, int tipoParcela]:
+    'verdadeiro' {$tipoParcela = 0;} | 'falso' {$tipoParcela = 1;} | exp_relacional { $tipoParcela = 2;};
 
 IDENT:
     ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*;
