@@ -76,8 +76,10 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     public String visitVariavel(GrammarLAParser.VariavelContext ctx) {
         System.out.print("\t" + visitTipo(ctx.tipo())+" ");
         System.out.print(ctx.IDENT());
-        visitDimensao(ctx.dimensao());
-        visitMais_var(ctx.mais_var());
+        if(ctx.dimensao() != null)
+            visitDimensao(ctx.dimensao());
+        if(ctx.mais_var() != null)
+            visitMais_var(ctx.mais_var());
         System.out.println(";");
 
         // Coloca na tabela de simbolos
@@ -108,7 +110,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitDimensao(GrammarLAParser.DimensaoContext ctx) {
-        return super.visitDimensao(ctx);
+        if(ctx.children != null) {
+            System.out.print("[");
+            System.out.println(visitExp_aritmetica(ctx.exp_aritmetica()));
+            System.out.println("]");
+            if (ctx.dimensao() != null)
+                visitDimensao(ctx.dimensao());
+        }
+        return null;
     }
 
     @Override
@@ -134,16 +143,12 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitTipo_basico(GrammarLAParser.Tipo_basicoContext ctx) {
         if(ctx.getText().equals("literal")){
-            //System.out.print("char ");
             return "char";
         } else if (ctx.getText().equals("inteiro")){
-            //System.out.print("int ");
             return "int";
         } else if (ctx.getText().equals("real")){
-            //System.out.print("float ");
             return "float";
         } else if (ctx.getText().equals("logico")){
-            //System.out.print("int ");
             return "int";
         }
         return null;
@@ -241,7 +246,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 + ");"
                         );
                     } else {
-                        System.out.println("gets("
+                        System.out.println("\tgets("
                                 + ctx.identificador().IDENT().toString()
                                 + ");"
                         );
@@ -413,7 +418,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitParcela_unario(GrammarLAParser.Parcela_unarioContext ctx) {
-        String parConcat = null;
+        String parConcat = "";
         switch (ctx.tipoParcela){
             case 0:
                 break;
@@ -422,6 +427,8 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                 parConcat = ctx.IDENT().toString() + (visitChamada_partes(ctx.chamada_partes()) == null?"":visitChamada_partes(ctx.chamada_partes()));
                 break;
             case 2:
+                System.out.println("TETA!!");
+                parConcat = (ctx.NUM_INT().toString() == null?"":ctx.NUM_INT().toString());
                 break;
             case 3:
                 break;
