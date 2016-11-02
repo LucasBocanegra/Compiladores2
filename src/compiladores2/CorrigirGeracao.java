@@ -23,10 +23,10 @@ public class CorrigirGeracao {
     // Especifique o caminho dos casos de teste.
     // Deve haver dois subdiretorios: entrada e saida
     private final static String CAMINHO_CASOS_TESTE =
-            "C:\\CC2\\casosDeTesteT1\\3.arquivos_sem_erros\\teste";
+            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/3.arquivos_sem_erros/teste";
 
     private final static String CAMINHO_CASOS_SAIDA =
-            "C:\\CC2\\casosDeTesteT1\\3.arquivos_sem_erros\\testeC";
+            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/3.arquivos_sem_erros/testeC";
 
 
     public static void main(String[] args) throws IOException, RecognitionException, NullPointerException{
@@ -51,7 +51,7 @@ public class CorrigirGeracao {
                 geracao.visitPrograma(context);
 
                 System.out.println("############################### ESPERADO (ORIGINAL) ##############################");
-                List<String> out = Files.readAllLines(Paths.get(CAMINHO_CASOS_SAIDA+"\\"+casoTeste.getName()+".c"), StandardCharsets.UTF_8);
+                List<String> out = Files.readAllLines(Paths.get(CAMINHO_CASOS_SAIDA+"/"+casoTeste.getName()+".c"), StandardCharsets.UTF_8);
                 for (String t : out){
                     System.out.println(t);
                 }

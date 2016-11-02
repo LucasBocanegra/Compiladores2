@@ -74,8 +74,12 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitVariavel(GrammarLAParser.VariavelContext ctx) {
-        System.out.print("\t" + visitTipo(ctx.tipo())+" ");
-        System.out.print(ctx.IDENT());
+        String TipoVar = visitTipo(ctx.tipo());
+        System.out.print("\t" + TipoVar  + " ");
+        if (!TipoVar.equals("char"))
+            System.out.print(ctx.IDENT());
+        else
+            System.out.print(ctx.IDENT()+"[80]");
         if(ctx.dimensao() != null)
             visitDimensao(ctx.dimensao());
         if(ctx.mais_var() != null)
@@ -111,11 +115,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitDimensao(GrammarLAParser.DimensaoContext ctx) {
         if(ctx.children != null) {
-            System.out.print("[");
-            System.out.println(visitExp_aritmetica(ctx.exp_aritmetica()));
-            System.out.println("]");
+            String DimConcat =
+                    "[" + visitExp_aritmetica(ctx.exp_aritmetica()) + "]";
             if (ctx.dimensao() != null)
-                visitDimensao(ctx.dimensao());
+                DimConcat += visitDimensao(ctx.dimensao());
+            return DimConcat;
         }
         return null;
     }
@@ -257,33 +261,76 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     visitMais_ident(ctx.mais_ident());
                     break;
                 case 1:
-                    System.out.print("\tprintf(");
-                    String varParam = visitExpressao(ctx.expressao());
-                    if(escopoAtual.existeSimbolo(varParam)){
-                        String tipo;
-                        switch (escopoAtual.getTipoSimbolo(varParam)){
-                            case "int":
-                                tipo = "%d";
-                                break;
-                            case "float":
-                                tipo = "%f";
-                                break;
-                            default:
-                                tipo = "%s";
-                                break;
+
+                    String varParam = visitExpressao(ctx.expressao()) +
+                            (visitMais_expressao(ctx.mais_expressao()) == null ?"":visitMais_expressao(ctx.mais_expressao()));
+                    String tipo;
+                    if(ctx.mais_expressao().children == null) {
+
+                        if(escopoAtual.existeSimbolo(varParam)){
+                            switch (escopoAtual.getTipoSimbolo(varParam)){
+                                case "int":
+                                    tipo = "%d";
+                                    break;
+                                case "float":
+                                    tipo = "%f";
+                                    break;
+                                default:
+                                    tipo = "%s";
+                                    break;
+                            }
+                            System.out.print("\tprintf(");
+                            System.out.print("\""
+                                    + tipo
+                                    + "\","
+                                    + varParam
+                            );
+                            System.out.println(");");
+                        }else {
+                            System.out.print(varParam);
+                            System.out.println(");");
                         }
-                        System.out.print("\""
-                                + tipo
-                                + "\","
-                                + varParam
-                        );
-                    }
-                    System.out.println(");");
-                    //TODO:NAO FAZ SENTIDO ALGUM ???!
-                    if(ctx.mais_expressao().mais_expressao() != null) {
-                        System.out.print("printf(");
-                        visitMais_expressao(ctx.mais_expressao());
-                        System.out.print(");");
+                    }else{
+                        String varParamSplited[] = varParam.split(",");
+                        for(int i = 0 ; i < varParamSplited.length ; i ++) {
+                            if (escopoAtual.existeSimbolo(varParamSplited[i])) {
+                                switch (escopoAtual.getTipoSimbolo(varParamSplited[i])){
+                                    case "int":
+                                        tipo = "%d";
+                                        break;
+                                    case "float":
+                                        tipo = "%f";
+                                        break;
+                                    default:
+                                        tipo = "%s";
+                                        break;
+                                }
+                                System.out.print("\tprintf(");
+                                System.out.print("\""
+                                        + tipo
+                                        + "\","
+                                        + varParamSplited[i]
+                                );
+                                System.out.println(");");
+                            }else {
+                                switch (escopoAtual.getTipoSimbolo(varParamSplited[i+1])){
+                                    case "int":
+                                        tipo = "%d";
+                                        break;
+                                    case "float":
+                                        tipo = "%f";
+                                        break;
+                                    default:
+                                        tipo = "%s";
+                                        break;
+                                }
+                                System.out.print("\tprint(");
+                                System.out.print(varParamSplited[i].substring(0, varParamSplited[i].length()-1) + tipo + "\"," + varParamSplited[i+1] );
+                                System.out.println(");");
+                                i++;
+                            }
+                        }
+
                     }
                     break;
                 case 2:
@@ -309,7 +356,16 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitMais_expressao(GrammarLAParser.Mais_expressaoContext ctx) {
-        return null;
+        if(ctx.children != null) {
+            String maisexpressaoConcat = ","
+                    + visitExpressao(ctx.expressao())
+                    + (visitMais_expressao(ctx.mais_expressao()) == null?"":visitMais_expressao(ctx.mais_expressao()));
+            return maisexpressaoConcat;
+        }
+        else {
+            return null;
+        }
+
     }
 
     @Override
@@ -366,6 +422,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     public String visitExp_aritmetica(GrammarLAParser.Exp_aritmeticaContext ctx) {
         String expAConcat = (visitTermo(ctx.termo()) == null?"":visitTermo(ctx.termo()))
                 + (visitOutros_termos(ctx.outros_termos()) == null?"":visitOutros_termos(ctx.outros_termos()));
+
         return expAConcat;
     }
 
@@ -423,11 +480,9 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             case 0:
                 break;
             case 1:
-                //System.out.println(ctx.IDENT().toString());
                 parConcat = ctx.IDENT().toString() + (visitChamada_partes(ctx.chamada_partes()) == null?"":visitChamada_partes(ctx.chamada_partes()));
                 break;
             case 2:
-                System.out.println("TETA!!");
                 parConcat = (ctx.NUM_INT().toString() == null?"":ctx.NUM_INT().toString());
                 break;
             case 3:
