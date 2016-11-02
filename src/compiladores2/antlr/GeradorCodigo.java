@@ -74,27 +74,46 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitVariavel(GrammarLAParser.VariavelContext ctx) {
+        String varsConcat = "";
+        TabelaDeSimbolos escopoAtual = pt.topo();
+
         String TipoVar = visitTipo(ctx.tipo());
         System.out.print("\t" + TipoVar  + " ");
+
         if (!TipoVar.equals("char"))
-            System.out.print(ctx.IDENT());
+            varsConcat += ctx.IDENT();
         else
             System.out.print(ctx.IDENT()+"[80]");
+
         if(ctx.dimensao() != null)
             visitDimensao(ctx.dimensao());
-        if(ctx.mais_var() != null)
-            visitMais_var(ctx.mais_var());
+
+        if(ctx.mais_var().children != null){
+            varsConcat  += visitMais_var(ctx.mais_var());
+           String varConcat[] = visitMais_var(ctx.mais_var()).split(", ");
+            for (String varConcate:varConcat) {
+                escopoAtual.adicionarSimbolo(varConcate, visitTipo(ctx.tipo()));
+            }
+
+        }
+        System.out.print(varsConcat);
         System.out.println(";");
 
         // Coloca na tabela de simbolos
-        TabelaDeSimbolos escopoAtual = pt.topo();
         escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()));
         return null;
     }
 
     @Override
     public String visitMais_var(GrammarLAParser.Mais_varContext ctx) {
-        return super.visitMais_var(ctx);
+        if(ctx.children != null){
+            String maisvarConcat = ", " +
+                    ctx.IDENT()
+                    + (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()))
+                    + (visitMais_var(ctx.mais_var()) == null?"":visitMais_var(ctx.mais_var()));
+            return maisvarConcat;
+        }
+        return null;
     }
 
     @Override
@@ -261,14 +280,16 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     visitMais_ident(ctx.mais_ident());
                     break;
                 case 1:
-
                     String varParam = visitExpressao(ctx.expressao()) +
                             (visitMais_expressao(ctx.mais_expressao()) == null ?"":visitMais_expressao(ctx.mais_expressao()));
                     String tipo;
-                    if(ctx.mais_expressao().children == null) {
 
-                        if(escopoAtual.existeSimbolo(varParam)){
-                            switch (escopoAtual.getTipoSimbolo(varParam)){
+                    //TODO: Arrumar
+                    String varParamSplit[] = visitExpressao(ctx.expressao()).split("\\+");
+
+                    if(ctx.mais_expressao().children == null) {
+                        if(escopoAtual.existeSimbolo(varParamSplit[0])){
+                            switch (escopoAtual.getTipoSimbolo(varParamSplit[0])){
                                 case "int":
                                     tipo = "%d";
                                     break;
@@ -287,6 +308,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                             );
                             System.out.println(");");
                         }else {
+                            System.out.print("\tprintf(");
                             System.out.print(varParam);
                             System.out.println(");");
                         }
@@ -433,7 +455,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOp_adicao(GrammarLAParser.Op_adicaoContext ctx) {
-        return super.visitOp_adicao(ctx);
+        return ctx.getText();
     }
 
     @Override
@@ -445,7 +467,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOutros_termos(GrammarLAParser.Outros_termosContext ctx) {
-        return super.visitOutros_termos(ctx);
+        if(ctx.children != null){
+            String outrostermosConcat =
+                    visitOp_adicao(ctx.op_adicao())
+                    + (visitTermo(ctx.termo()) == null?"":visitTermo(ctx.termo()))
+                    + (visitOutros_termos(ctx.outros_termos()) == null?"":visitOutros_termos(ctx.outros_termos()));
+            return outrostermosConcat;
+        }
+        return null;
     }
 
     @Override
