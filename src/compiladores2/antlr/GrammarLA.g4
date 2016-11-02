@@ -27,8 +27,8 @@ identificador :
 ponteiros_opcionais returns [boolean ehPonteiro]:
     '^' ponteiros_opcionais | ;
 
-outros_ident :
-    '.' identificador | ;
+outros_ident returns [String name] : //se entrar e não retornar nulo, significa que eh um registro
+    '.' IDENT | ;
 
 dimensao :
     '[' exp_aritmetica ']' dimensao | ;
@@ -92,7 +92,7 @@ cmd returns [ int tipoCmd ]:
     | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
     | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
     | IDENT chamada_atribuicao { $tipoCmd = 8; }
-    | 'retorne' expressao { $tipoCmd = 9; }
+    | 'retorne' expressao { $tipoCmd = 10; }
 ;
 mais_expressao:
     ',' expressao mais_expressao | ;
@@ -201,7 +201,7 @@ parcela_logica returns[String tipoSimbolo, int tipoParcela]:
     'verdadeiro' {$tipoParcela = 0;} | 'falso' {$tipoParcela = 1;} | exp_relacional { $tipoParcela = 2;};
 
 IDENT:
-    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_' | '.')*;
+    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_' )*;
 
 NUM_INT:
     '0'..'9'+;

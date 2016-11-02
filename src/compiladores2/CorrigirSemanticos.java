@@ -19,10 +19,10 @@ public class CorrigirSemanticos {
     // Especifique o caminho dos casos de teste.
     // Deve haver dois subdiretorios: entrada e saida
     private final static String CAMINHO_CASOS_TESTE =
-          "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/2.arquivos_com_erros_semanticos/teste";
+          "/home/lucas/Dropbox/bcc/2016/2sem/cc2/casosDeTesteT1/2.arquivos_com_erros_semanticos/teste";
 
     private final static String CAMINHO_CASOS_SAIDA =
-            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/2.arquivos_com_erros_semanticos/saida";
+            "/home/lucas/Dropbox/bcc/2016/2sem/cc2/casosDeTesteT1/2.arquivos_com_erros_semanticos/saida";
 
 
     public static void main(String[] args) throws IOException, RecognitionException, NullPointerException{
