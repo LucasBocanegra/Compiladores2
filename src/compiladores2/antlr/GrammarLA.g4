@@ -51,8 +51,10 @@ tipo_basico_ident:
 tipo_estendido returns [boolean ehPonteiro]:
     ponteiros_opcionais tipo_basico_ident;
 
-valor_constante:
-    CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso';
+valor_constante returns[int TipoConstante, String tipoSimbolo]:
+    CADEIA {$TipoConstante = 0} | NUM_INT{$TipoConstante = 1} | NUM_REAL{$TipoConstante = 2} |
+     'verdadeiro'{$TipoConstante = 3} | 'falso'{$TipoConstante = 4}
+     ;
 
 registro:
     'registro' variavel mais_variaveis 'fim_registro';

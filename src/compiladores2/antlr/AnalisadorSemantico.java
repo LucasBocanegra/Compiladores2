@@ -231,6 +231,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             return visitTipo_basico(ctx.tipo_basico());
             //eh um tipo criado (declaracao de tipo)
         }else{
+
             TabelaDeSimbolos escopoAtual = pt.topo();
             //se o Tipo existe na tabela de símbolos ou seja, se o simbolo ja foi declarado
             if(escopoAtual.existeSimbolo(ctx.IDENT().toString())){
@@ -258,7 +259,26 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     @Override
     public String visitValor_constante(GrammarLAParser.Valor_constanteContext ctx) {
-        return ctx.getText();
+        if(ctx.children != null){
+            switch (ctx.TipoConstante){
+                case 0:
+                    ctx.tipoSimbolo = "literal";
+                    break;
+                case 1:
+                    ctx.tipoSimbolo = "inteiro";
+                    break;
+                case 2:
+                    ctx.tipoSimbolo = "real";
+                    break;
+                case 3:
+                    ctx.tipoSimbolo = "logico";
+                    break;
+                case 4:
+                    ctx.tipoSimbolo = "logico";
+                    break;
+            }
+        }
+        return null;
     }
 
     @Override
