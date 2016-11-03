@@ -59,8 +59,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     visitVariavel(ctx.variavel());
                     break;
                 case 1:
-                    //TODO: Falta implementar
-                    // visitValor_constante(ctx.valor_constante());
+                    System.out.println("#define "+ ctx.IDENT() + " " + visitValor_constante(ctx.valor_constante())+"\n");
                     break;
                 case 2:
                     //TODO: Falta implementar
@@ -78,7 +77,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
         TabelaDeSimbolos escopoAtual = pt.topo();
 
         String TipoVar = visitTipo(ctx.tipo());
-        System.out.print("\t" + TipoVar  + " ");
+        if(!TipoVar.contains("*"))
+            System.out.print("\t" + TipoVar  + " ");
+        else {
+            System.out.print("\t" + TipoVar.substring(1) + TipoVar.substring(0,1) + " " );
+        }
 
         if (!TipoVar.equals("char"))
             varsConcat += ctx.IDENT();
@@ -123,7 +126,13 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitPonteiros_opcionais(GrammarLAParser.Ponteiros_opcionaisContext ctx) {
-        return super.visitPonteiros_opcionais(ctx);
+        if(ctx.children != null ){
+            String ponteirosopcionaisConcat =
+                    "*"
+                    + (visitPonteiros_opcionais(ctx.ponteiros_opcionais()) == null?"":visitPonteiros_opcionais(ctx.ponteiros_opcionais()));
+            return ponteirosopcionaisConcat;
+        }else
+            return null;
     }
 
     @Override
@@ -190,14 +199,18 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitTipo_estendido(GrammarLAParser.Tipo_estendidoContext ctx) {
-        //TODO: Falta implementar ponteiro_opcionais
-        visitPonteiros_opcionais(ctx.ponteiros_opcionais());
-        return visitTipo_basico_ident(ctx.tipo_basico_ident());
+        String tipoestendidoConcat =
+                (visitPonteiros_opcionais(ctx.ponteiros_opcionais()) == null?"":visitPonteiros_opcionais(ctx.ponteiros_opcionais()))
+        + visitTipo_basico_ident(ctx.tipo_basico_ident());
+        return  tipoestendidoConcat;
     }
 
     @Override
     public String visitValor_constante(GrammarLAParser.Valor_constanteContext ctx) {
-        return super.visitValor_constante(ctx);
+        if(ctx.getText() != "verdadeiro" && ctx.getText() != "falso"){
+            return ctx.getText();
+        }else
+            return null;
     }
 
     @Override
@@ -314,7 +327,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                         }
                     }else{
                         String varParamSplited[] = varParam.split(",");
-                        for(int i = 0 ; i < varParamSplited.length ; i ++) {
+                        for(int i = 0 ; i < varParamSplited.length ; i++) {
                             if (escopoAtual.existeSimbolo(varParamSplited[i])) {
                                 switch (escopoAtual.getTipoSimbolo(varParamSplited[i])){
                                     case "int":
@@ -334,7 +347,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                         + varParamSplited[i]
                                 );
                                 System.out.println(");");
-                            }else {
+                            }else if( i+1 < varParamSplited.length && escopoAtual.existeSimbolo(varParamSplited[i+1])){
                                 switch (escopoAtual.getTipoSimbolo(varParamSplited[i+1])){
                                     case "int":
                                         tipo = "%d";
@@ -351,23 +364,71 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 System.out.println(");");
                                 i++;
                             }
+                            else{
+                                System.out.print("\tprint(");
+                                System.out.print(varParamSplited[i]);
+                                System.out.println(");");
+                            }
                         }
 
                     }
                     break;
                 case 2:
+                    System.out.print("\tif (");
+                    System.out.print(visitExpressao(ctx.expressao()));
+                    System.out.println(") {");
+                    System.out.print("\t");
+                    visitComandos(ctx.comandos());
+
+                    if(ctx.senao_opcional().children != null) {
+                        System.out.println("\t}");
+                        System.out.println("\telse {");
+                        System.out.print("\t");
+                        visitSenao_opcional(ctx.senao_opcional());
+                    }
+
+                    System.out.println("\t}");
                     break;
                 case 3:
+                    System.out.print("\tswitch (");
+                    System.out.print(visitExp_aritmetica(ctx.exp_aritmetica(0)));
+                    System.out.println(") {");
+                    visitSelecao(ctx.selecao());
+                    if(ctx.senao_opcional().children != null) {
+                        System.out.println("\tdefault:");
+                        System.out.print("\t");
+                        visitSenao_opcional(ctx.senao_opcional());
+                    }
+                    System.out.println("\t}");
                     break;
                 case 4:
+                    System.out.println("\tfor (" + ctx.IDENT() +" = " +visitExp_aritmetica(ctx.exp_aritmetica(0)) + "; " + ctx.IDENT().toString() + " <= " + visitExp_aritmetica(ctx.exp_aritmetica(1)) + "; " +ctx.IDENT().toString() +"++) {");
+                    visitComandos(ctx.comandos());
+                    System.out.println("\t}");
+
                     break;
                 case 5:
+                    System.out.println("\twhile (" + visitExpressao(ctx.expressao()) + ") {");
+                    visitComandos(ctx.comandos());
+                    System.out.println("}");
                     break;
                 case 6:
+                    System.out.println("\tdo {");
+                    visitComandos(ctx.comandos());
+                    System.out.println("\t} while(" + visitExpressao(ctx.expressao())+");");
                     break;
                 case 7:
+                    System.out.println("\t*"+ctx.IDENT().toString() +
+                            (visitOutros_ident(ctx.outros_ident()) == null?"":visitOutros_ident(ctx.outros_ident()))
+                            + (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()))
+                            +" = "
+                            + visitExpressao(ctx.expressao())
+                            +";"
+                    );
+
                     break;
                 case 8:
+                    System.out.println("\t" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ";");
                     break;
                 default:
                     break;
@@ -392,12 +453,25 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitSenao_opcional(GrammarLAParser.Senao_opcionalContext ctx) {
-        return super.visitSenao_opcional(ctx);
+        if(ctx.children != null){
+            String senao_opicionalConcat = visitComandos(ctx.comandos());
+            return senao_opicionalConcat;
+        }
+        return null;
     }
 
     @Override
     public String visitChamada_atribuicao(GrammarLAParser.Chamada_atribuicaoContext ctx) {
-        return super.visitChamada_atribuicao(ctx);
+        if(ctx.expressao().children != null){
+            String chamadaatribuicaoConcat =
+                    (visitOutros_ident(ctx.outros_ident()) == null?"":visitOutros_ident(ctx.outros_ident()))
+                    + (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()))
+                    + " = "
+                    + visitExpressao(ctx.expressao()).replace("+"," + ");
+            return chamadaatribuicaoConcat;
+        }
+        else
+            return null;
     }
 
     @Override
@@ -407,7 +481,17 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitSelecao(GrammarLAParser.SelecaoContext ctx) {
-        return super.visitSelecao(ctx);
+        String Constantes[] = visitConstantes(ctx.constantes()).split("\\.\\.");
+        if(Constantes.length > 1)
+            for(int i = Integer.parseInt(Constantes[0]); i <= Integer.parseInt(Constantes[1]); i++)
+                System.out.println("\tcase " + i + ":");
+        else
+            System.out.println("\tcase " + Constantes[0] + ":");
+        System.out.print("\t");
+        visitComandos(ctx.comandos());
+        System.out.println("\t\tbreak;");
+        visitMais_selecao(ctx.mais_selecao());
+        return null;
     }
 
     @Override
@@ -417,7 +501,10 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitConstantes(GrammarLAParser.ConstantesContext ctx) {
-        return super.visitConstantes(ctx);
+        String constantesConcat =
+                visitNumero_intervalo(ctx.numero_intervalo())
+                + (visitMais_constantes(ctx.mais_constantes()) == null?"":visitMais_constantes(ctx.mais_constantes()));
+        return constantesConcat;
     }
 
     @Override
@@ -427,12 +514,23 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitNumero_intervalo(GrammarLAParser.Numero_intervaloContext ctx) {
-        return super.visitNumero_intervalo(ctx);
+        String numerointervaloConcat =
+                (visitOp_unario(ctx.op_unario()) == null?"":visitOp_unario(ctx.op_unario()))
+                + ctx.NUM_INT()
+                + (visitIntervalo_opcional(ctx.intervalo_opcional()) == null?"":visitIntervalo_opcional(ctx.intervalo_opcional()));
+        return numerointervaloConcat;
     }
 
     @Override
     public String visitIntervalo_opcional(GrammarLAParser.Intervalo_opcionalContext ctx) {
-        return super.visitIntervalo_opcional(ctx);
+        if(ctx.children != null){
+            String intervaloopcionalConcat =
+                    ".."
+                    + (visitOp_unario(ctx.op_unario()) == null?"":visitOp_unario(ctx.op_unario()))
+                    + ctx.NUM_INT();
+            return intervaloopcionalConcat;
+        }else
+            return null;
     }
 
     @Override
@@ -515,6 +613,10 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                 parConcat = (ctx.NUM_INT().toString() == null?"":ctx.NUM_INT().toString());
                 break;
             case 3:
+                parConcat = (ctx.NUM_REAL().toString() == null?"":ctx.NUM_REAL().toString());
+                break;
+            case 4:
+                parConcat = "("+ visitExpressao(ctx.expressao()) + ")";
                 break;
             default:
                 break;
@@ -527,8 +629,12 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
         if(ctx.CADEIA() != null)
             return ctx.CADEIA().toString();
         else{
-            //TODO: Falta implementar resto
-            return null;
+            String parcelanaounarioConcat =
+                    "&"
+                    + ctx.IDENT().toString()
+                    + (visitOutros_ident(ctx.outros_ident()) == null?"":visitOutros_ident(ctx.outros_ident()))
+                    + (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()));
+            return parcelanaounarioConcat;
         }
     }
 
@@ -551,12 +657,22 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOp_opcional(GrammarLAParser.Op_opcionalContext ctx) {
-        return super.visitOp_opcional(ctx);
+        if(ctx.children != null){
+            String opopcionalConcat =
+                    visitOp_relacional(ctx.op_relacional())
+                    +visitExp_aritmetica(ctx.exp_aritmetica());
+            return opopcionalConcat;
+        }else
+            return null;
+
     }
 
     @Override
     public String visitOp_relacional(GrammarLAParser.Op_relacionalContext ctx) {
-        return super.visitOp_relacional(ctx);
+        if(ctx.getText().equals("="))
+            return " == ";
+        else
+            return " " + ctx.getText() + " ";
     }
 
     @Override
@@ -570,7 +686,10 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOp_nao(GrammarLAParser.Op_naoContext ctx) {
-        return super.visitOp_nao(ctx);
+        if(ctx.children != null)
+            return "!";
+        else
+            return null;
     }
 
     @Override
@@ -588,7 +707,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOutros_fatores_logicos(GrammarLAParser.Outros_fatores_logicosContext ctx) {
-        return super.visitOutros_fatores_logicos(ctx);
+        if(ctx.children != null){
+            String outrosfatoreslogicosConcat =
+                    " && "
+                    + visitFator_logico(ctx.fator_logico())
+                    + (visitOutros_fatores_logicos(ctx.outros_fatores_logicos()) == null?"":visitOutros_fatores_logicos(ctx.outros_fatores_logicos()));
+            return outrosfatoreslogicosConcat;
+        }else
+            return null;
     }
 
     @Override
