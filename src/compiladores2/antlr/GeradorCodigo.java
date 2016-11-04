@@ -286,10 +286,21 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitParametro(GrammarLAParser.ParametroContext ctx) {
+        TabelaDeSimbolos escopoAtual = pt.topo();
         String parConcat = "";
-        parConcat += (visitTipo_estendido(ctx.tipo_estendido()) == null?"":visitTipo_estendido(ctx.tipo_estendido()));
+        String parTipo = (visitTipo_estendido(ctx.tipo_estendido()) == null?"":visitTipo_estendido(ctx.tipo_estendido()));
+        parConcat += parTipo;
         parConcat += (visitVar_opcional(ctx.var_opcional()) == null?"":visitVar_opcional(ctx.var_opcional()));
-        parConcat += " " + visitIdentificador(ctx.identificador());
+        try{
+            escopoAtual.adicionarSimbolo(ctx.identificador().IDENT().toString(),parTipo);
+            if(escopoAtual.getTipoSimbolo(ctx.identificador().IDENT().toString()).equals("char"))
+                parConcat += " *";
+            else
+                parConcat += " ";
+        } catch (NullPointerException e){
+            parConcat += " ";
+        }
+        parConcat += visitIdentificador(ctx.identificador());
         parConcat += (visitMais_ident(ctx.mais_ident()) == null?"":visitMais_ident(ctx.mais_ident()));
         parConcat += (visitMais_parametros(ctx.mais_parametros()) == null?"":visitMais_parametros(ctx.mais_parametros()));
         return parConcat;
@@ -518,8 +529,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             TabelaDeSimbolos escopoAtual = pt.topo();
             String tipoVar = "";
             String chamadaatribuicaoConcat = "";
-            if(ctx.outros_ident().identificador().children != null)
+            try{
                 tipoVar = escopoAtual.getTipoSimbolo(ctx.outros_ident().identificador().IDENT().toString());
+            } catch (NullPointerException e){
+
+            }
 
             if(!tipoVar.equals("char")) {
                 chamadaatribuicaoConcat =
