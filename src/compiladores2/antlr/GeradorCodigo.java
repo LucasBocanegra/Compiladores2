@@ -112,9 +112,6 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
         else
             System.out.print(ctx.IDENT()+"[80]");
 
-        if(ctx.dimensao() != null)
-            visitDimensao(ctx.dimensao());
-
         if(ctx.mais_var().children != null){
             varsConcat  += visitMais_var(ctx.mais_var());
            String varConcat[] = visitMais_var(ctx.mais_var()).split(", ");
@@ -124,6 +121,9 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
         }
         System.out.print(varsConcat);
+        if(ctx.dimensao() != null) {
+            System.out.print((visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao())));
+        }
         System.out.println(";");
 
         // Coloca na tabela de simbolos
@@ -179,7 +179,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             String DimConcat =
                     "[" + visitExp_aritmetica(ctx.exp_aritmetica()) + "]";
             if (ctx.dimensao() != null)
-                DimConcat += visitDimensao(ctx.dimensao());
+                DimConcat += (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()));
             return DimConcat;
         }
         return null;
@@ -393,6 +393,15 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                             System.out.println(");");
                         } else if (varParamSplit[0].contains("(")){
                             String sp3[] = varParamSplit[0].split("\\(");
+                            System.out.println("\tprintf("
+                                    + "\""
+                                    + tipoPrint(escopoAtual.getTipoSimbolo(sp3[0]))
+                                    + "\","
+                                    + varParamSplit[0]
+                                    + ");"
+                            );
+                        } else if (varParamSplit[0].contains("[")) {
+                            String sp3[] = varParamSplit[0].split("\\[");
                             System.out.println("\tprintf("
                                     + "\""
                                     + tipoPrint(escopoAtual.getTipoSimbolo(sp3[0]))
@@ -812,8 +821,6 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     public String visitExpressao(GrammarLAParser.ExpressaoContext ctx) {
         String expConcat = (visitTermo_logico(ctx.termo_logico()) == null?"":visitTermo_logico(ctx.termo_logico()))
                 + (visitOutros_termos_logicos(ctx.outros_termos_logicos()) == null?"":visitOutros_termos_logicos(ctx.outros_termos_logicos()));
-        //TODO: Falta implementar outros termos logicos
-
         return expConcat;
     }
 
@@ -829,7 +836,6 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     public String visitTermo_logico(GrammarLAParser.Termo_logicoContext ctx) {
         String termConcat = (visitFator_logico(ctx.fator_logico()) == null?"":visitFator_logico(ctx.fator_logico()))
                 + (visitOutros_fatores_logicos(ctx.outros_fatores_logicos()) == null?"":visitOutros_fatores_logicos(ctx.outros_fatores_logicos()));
-        //TODO: Falta implementar outros fatores logicos
         return termConcat;
     }
 
