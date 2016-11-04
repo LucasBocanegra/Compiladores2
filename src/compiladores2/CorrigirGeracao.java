@@ -23,10 +23,10 @@ public class CorrigirGeracao {
     // Especifique o caminho dos casos de teste.
     // Deve haver dois subdiretorios: entrada e saida
     private final static String CAMINHO_CASOS_TESTE =
-            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/3.arquivos_sem_erros/teste";
+            "C:\\CC2\\casosDeTesteT1\\3.arquivos_sem_erros\\teste";
 
     private final static String CAMINHO_CASOS_SAIDA =
-            "/media/leo/421B33D37F4D6D97/Comp2/Compiladores2/src/compiladores2/casosDeTesteT1/3.arquivos_sem_erros/testeC";
+            "C:\\CC2\\casosDeTesteT1\\3.arquivos_sem_erros\\testeC";
 
 
     public static void main(String[] args) throws IOException, RecognitionException, NullPointerException{
