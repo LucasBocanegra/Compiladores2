@@ -145,7 +145,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitIdentificador(GrammarLAParser.IdentificadorContext ctx) {
-        String idConcat = ".";
+        String idConcat = "";
 
         idConcat += (visitPonteiros_opcionais(ctx.ponteiros_opcionais()) == null?"":visitPonteiros_opcionais(ctx.ponteiros_opcionais())+" ");
         idConcat += ctx.IDENT();
@@ -168,7 +168,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitOutros_ident(GrammarLAParser.Outros_identContext ctx) {
         if(ctx.children != null){
-            return visitIdentificador(ctx.identificador());
+            return "." + visitIdentificador(ctx.identificador());
         }
         return null;
     }
@@ -263,17 +263,36 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitDeclaracao_global(GrammarLAParser.Declaracao_globalContext ctx) {
-        return super.visitDeclaracao_global(ctx);
+        if(ctx.tipoGlob == 0){
+            System.out.print("void " + ctx.IDENT().toString() + "(");
+            System.out.print(visitParametros_opcional(ctx.parametros_opcional()));
+            System.out.println(") {");
+            visitDeclaracoes_locais(ctx.declaracoes_locais());
+            visitComandos(ctx.comandos());
+            System.out.println("}");
+        } else {
+            //TODO: Falta implementar funcao
+        }
+        return null;
     }
 
     @Override
     public String visitParametros_opcional(GrammarLAParser.Parametros_opcionalContext ctx) {
-        return super.visitParametros_opcional(ctx);
+        if(ctx.children != null){
+            return visitParametro(ctx.parametro());
+        } else
+            return null;
     }
 
     @Override
     public String visitParametro(GrammarLAParser.ParametroContext ctx) {
-        return super.visitParametro(ctx);
+        String parConcat = "";
+        parConcat += (visitTipo_estendido(ctx.tipo_estendido()) == null?"":visitTipo_estendido(ctx.tipo_estendido()));
+        parConcat += (visitVar_opcional(ctx.var_opcional()) == null?"":visitVar_opcional(ctx.var_opcional()));
+        parConcat += " " + visitIdentificador(ctx.identificador());
+        parConcat += (visitMais_ident(ctx.mais_ident()) == null?"":visitMais_ident(ctx.mais_ident()));
+        parConcat += (visitMais_parametros(ctx.mais_parametros()) == null?"":visitMais_parametros(ctx.mais_parametros()));
+        return parConcat;
     }
 
     @Override
@@ -452,8 +471,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     break;
                 case 8:
                     String tipoVar = "";
-                    if(ctx.chamada_atribuicao().outros_ident().identificador().IDENT() != null)
+                    try{
                         tipoVar = escopoAtual.getTipoSimbolo(ctx.chamada_atribuicao().outros_ident().identificador().IDENT().toString());
+                    } catch (NullPointerException e){
+
+                    }
                     if(!tipoVar.equals("char"))
                         System.out.println("\t" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ";");
                     else
@@ -491,7 +513,8 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitChamada_atribuicao(GrammarLAParser.Chamada_atribuicaoContext ctx) {
-        if(ctx.expressao().children != null){
+        //if(ctx.expressao().children != null){ deu pau com o children
+        if(ctx.expressao() != null){
             TabelaDeSimbolos escopoAtual = pt.topo();
             String tipoVar = "";
             String chamadaatribuicaoConcat = "";
@@ -513,13 +536,23 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             }
             return chamadaatribuicaoConcat;
         }
-        else
-            return null;
+        else {
+            String caConcat = "(";
+            caConcat += visitArgumentos_opcional(ctx.argumentos_opcional());
+            caConcat += ")";
+            return caConcat;
+        }
     }
 
     @Override
     public String visitArgumentos_opcional(GrammarLAParser.Argumentos_opcionalContext ctx) {
-        return super.visitArgumentos_opcional(ctx);
+        if(ctx.children != null){
+            String aoConcat = "";
+            aoConcat += (visitExpressao(ctx.expressao()) == null?"":visitExpressao(ctx.expressao()));
+            aoConcat += (visitMais_expressao(ctx.mais_expressao()) == null?"":visitMais_expressao(ctx.mais_expressao()));
+            return aoConcat;
+        } else
+            return null;
     }
 
     @Override

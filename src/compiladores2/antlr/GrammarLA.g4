@@ -57,9 +57,9 @@ valor_constante:
 registro:
     'registro' variavel mais_variaveis 'fim_registro';
 
-declaracao_global:
-    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'
-    | 'funcao' IDENT '(' parametros_opcional '):' tipo_estendido declaracoes_locais comandos 'fim_funcao';
+declaracao_global returns [int tipoGlob]:
+    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' {$tipoGlob=0;}
+    | 'funcao' IDENT '(' parametros_opcional '):' tipo_estendido declaracoes_locais comandos 'fim_funcao' {$tipoGlob=1;};
 
 parametros_opcional:
     parametro | ;
@@ -100,7 +100,7 @@ mais_expressao:
 senao_opcional:
     'senao' comandos | ;
 
-chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
+chamada_atribuicao [String nameAtribuicao, String tipoAtribuicao]:
     '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
 
 argumentos_opcional:
