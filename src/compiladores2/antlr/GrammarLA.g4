@@ -28,7 +28,7 @@ ponteiros_opcionais returns [boolean ehPonteiro]:
     '^' ponteiros_opcionais | ;
 
 outros_ident returns [String name] : //se entrar e não retornar nulo, significa que eh um registro
-    '.' IDENT | ;
+    '.' IDENT | ; //mudança na gramática original, ao invés se chamar o indentificar chama diretamente o IDENT
 
 dimensao :
     '[' exp_aritmetica ']' dimensao | ;
@@ -52,8 +52,8 @@ tipo_estendido returns [boolean ehPonteiro]:
     ponteiros_opcionais tipo_basico_ident;
 
 valor_constante returns[int TipoConstante, String tipoSimbolo]:
-    CADEIA {$TipoConstante = 0} | NUM_INT{$TipoConstante = 1} | NUM_REAL{$TipoConstante = 2} |
-     'verdadeiro'{$TipoConstante = 3} | 'falso'{$TipoConstante = 4}
+    CADEIA {$TipoConstante = 0;} | NUM_INT{$TipoConstante = 1;} | NUM_REAL{$TipoConstante = 2;} |
+     'verdadeiro'{$TipoConstante = 3;} | 'falso'{$TipoConstante = 4;}
      ;
 
 registro:
@@ -168,7 +168,7 @@ parcela_nao_unario returns[String tipoSimbolo, int tipoParcela]:
 outras_parcelas returns[String tipoSimbolo]:
     '%' parcela outras_parcelas | ;
 
-chamada_partes:
+chamada_partes returns[boolean ehRegistro]:
     '(' expressao mais_expressao ')' | outros_ident dimensao | ;
 
 exp_relacional returns[String tipoSimbolo]:

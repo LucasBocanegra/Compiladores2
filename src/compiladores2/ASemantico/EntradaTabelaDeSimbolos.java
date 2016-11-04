@@ -27,6 +27,17 @@ public class EntradaTabelaDeSimbolos {
         this.ehPonteiro = ehPonteiro;
     }
 
+    public EntradaTabelaDeSimbolos(String nome, Tipo t) {
+        this.nome = nome;
+        this.tipo = new Tipo(t.getValor());
+        this.ehPonteiro = false;
+        if(t.ehTipoComplexo()) {
+            for (String k : t.getCampos().keySet()) {
+                this.addCampoNoTipo(k, t.getCampos().get(k));
+            }
+        }
+    }
+
     public EntradaTabelaDeSimbolos(EntradaTabelaDeSimbolos etds) {
         this.nome = etds.getNome();
         this.tipo = new Tipo(etds.getValorTipo());

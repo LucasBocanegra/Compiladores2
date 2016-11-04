@@ -62,8 +62,29 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     visitValor_constante(ctx.valor_constante());
                     break;
                 case 2: //se for tipo
+                    int posicaoAtual = 0;
+                    String tipo = null;
+                    EntradaTabelaDeSimbolos novaEntrada = null;
+
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
-                        escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo(ctx.tipo()));
+                        posicaoAtual = escopoAtual.getUltimaPosicaoOcupada();
+                        tipo = visitTipo(ctx.tipo());
+
+                        if(tipo.equals("registro")){
+                            novaEntrada = new EntradaTabelaDeSimbolos(ctx.IDENT().toString(),tipo);
+                            if(escopoAtual.getUltimaPosicaoOcupada() != -1) {
+                                for (int k = posicaoAtual + 1; k <= escopoAtual.getUltimaPosicaoOcupada(); k++) {
+                                    String nome = escopoAtual.getNomeSimbolo(k);
+                                    Tipo t = escopoAtual.getTipoSimbolo(nome);
+                                    novaEntrada.addCampoNoTipo(nome, t.getValor());
+                                }
+                                escopoAtual.removeSimbolosAPartir(++posicaoAtual);
+                                escopoAtual.adicionarSimbolo(novaEntrada);
+                            }
+
+                        }else {
+                            escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
+                        }
                     }else{
                         System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
                     }
@@ -78,17 +99,15 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
     @Override
     public String visitVariavel(GrammarLAParser.VariavelContext ctx) {
         TabelaDeSimbolos escopoAtual = pt.topo();
-        int posicaoAtual = 0;
-        String tipo = null;
         EntradaTabelaDeSimbolos novaEntrada = null;
 
-        if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
-            posicaoAtual = escopoAtual.getUltimaPosicaoOcupada();
-            tipo = visitTipo(ctx.tipo());
+        int posicaoAtual = escopoAtual.getUltimaPosicaoOcupada();
+        String tipo = visitTipo(ctx.tipo());
 
+        if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
             if(tipo.equals("registro")){
                 novaEntrada = new EntradaTabelaDeSimbolos(ctx.IDENT().toString(),tipo);
-               if(escopoAtual.getUltimaPosicaoOcupada() != -1) {
+                if(escopoAtual.getUltimaPosicaoOcupada() != -1) {
                    for (int k = posicaoAtual + 1; k <= escopoAtual.getUltimaPosicaoOcupada(); k++) {
                        String nome = escopoAtual.getNomeSimbolo(k);
                        Tipo t = escopoAtual.getTipoSimbolo(nome);
@@ -96,8 +115,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                    }
                    escopoAtual.removeSimbolosAPartir(++posicaoAtual);
                    escopoAtual.adicionarSimbolo(novaEntrada);
-               }
-
+                }
             }else {
                 escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
             }
@@ -112,11 +130,31 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         while (m.children != null){
             if(!escopoAtual.existeSimbolo(visitMais_var(m))){
                 if(tipo.equals("registro")) {
-                    // o tipo eh o mesmo para as variáveis , por isso só altera o nome add na tabela
-                    EntradaTabelaDeSimbolos outraEntrada = new EntradaTabelaDeSimbolos(novaEntrada);
-                    outraEntrada.setNome(m.IDENT().toString());
-                    escopoAtual.adicionarSimbolo(outraEntrada);
-                }else{
+                    if(novaEntrada == null){ //significa que deu erro na primeira declaração (a primeira variável não existe)
+                        novaEntrada = new EntradaTabelaDeSimbolos(m.IDENT().toString(),tipo);
+                        if(escopoAtual.getUltimaPosicaoOcupada() != -1) {
+                            for (int k = posicaoAtual + 1; k <= escopoAtual.getUltimaPosicaoOcupada(); k++) {
+                                String nome = escopoAtual.getNomeSimbolo(k);
+                                Tipo t = escopoAtual.getTipoSimbolo(nome);
+                                novaEntrada.addCampoNoTipo(nome, t.getValor());
+                            }
+                            escopoAtual.removeSimbolosAPartir(++posicaoAtual);
+                            escopoAtual.adicionarSimbolo(novaEntrada);
+                        }
+                    }else{
+                        // o tipo eh o mesmo para as variáveis , por isso só altera o nome add na tabela
+                        EntradaTabelaDeSimbolos outraEntrada = new EntradaTabelaDeSimbolos(novaEntrada);
+                        outraEntrada.setNome(m.IDENT().toString());
+                        escopoAtual.adicionarSimbolo(outraEntrada);
+                    }
+                }else if(escopoAtual.existeSimbolo(tipo)){ //se for um tipo complexo
+                    Tipo t = escopoAtual.getTipoSimbolo(tipo);
+                    if(t.getValor().equals("registro")){
+                        //pega o tipo da entrada na tabela de simbolos (que eh um tipo) e add a variável declarada
+                        EntradaTabelaDeSimbolos outraEntrada = new EntradaTabelaDeSimbolos(m.IDENT().toString(),t);
+                        escopoAtual.adicionarSimbolo(outraEntrada);
+                    }
+                }else {
                     escopoAtual.adicionarSimbolo(m.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
                 }
             }else{
@@ -412,12 +450,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                                 System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
                             } else {
                                 tipoAtribuicao = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
+                                if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
+                                    if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
+                                        System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
+                                    }
+                                }
                             }
-                        }
-
-                        if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
-                            if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
-                                System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
+                        }else {
+                            if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
+                                if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
+                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
+                                }
                             }
                         }
                     }
@@ -622,7 +665,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         if(ctx.children != null){
             TabelaDeSimbolos escopoAtual = pt.topo();
             switch (ctx.tipoParcela){
-                case 0:
+                case 0: // caso por penteiro
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
                         System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                     }else{
@@ -631,13 +674,25 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     visitOutros_ident(ctx.outros_ident());
                     visitDimensao(ctx.dimensao());
                     break;
-                case 1:
-                    if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
-                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
-                    }else{
-                        ctx.tipoSimbolo = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
-                    }
+                case 1: //caso por uma variável
                     visitChamada_partes(ctx.chamada_partes());
+
+                    if(ctx.chamada_partes().ehRegistro){ // a variavel em questão eh um registro
+                        String nameAtribuicao = ctx.IDENT().toString();
+                        String campo1 = ctx.chamada_partes().outros_ident().IDENT().toString();
+
+                        if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao,campo1)) {
+                            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+                        } else {
+                            ctx.tipoSimbolo = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
+                        }
+                    }else{ //a variavel nao eh um registro
+                        if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
+                            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                        }else{
+                            ctx.tipoSimbolo = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
+                        }
+                    }
                     break;
                 case 2: //int
                     ctx.tipoSimbolo=  "inteiro";
@@ -645,7 +700,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 case 3: //real
                     ctx.tipoSimbolo=  "real";
                     break;
-                case 4:
+                case 4: //caso for funcao
                     visitExpressao(ctx.expressao());
                     ctx.tipoSimbolo = ctx.expressao().tipoSimbolo;
                     break;
@@ -688,10 +743,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             if(ctx.expressao() != null){
                 visitExpressao(ctx.expressao());
                 visitMais_expressao(ctx.mais_expressao());
+                ctx.ehRegistro = false;
             }
             else if(ctx.outros_ident() != null){
                 visitOutros_ident(ctx.outros_ident());
                 visitDimensao(ctx.dimensao());
+
+                if(ctx.outros_ident().name != null){
+                    ctx.ehRegistro = true;
+                }else{
+                    ctx.ehRegistro = false;
+                }
             }
             else{
                 return null;
