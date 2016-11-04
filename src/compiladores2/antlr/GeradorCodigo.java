@@ -269,9 +269,17 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             System.out.println(") {");
             visitDeclaracoes_locais(ctx.declaracoes_locais());
             visitComandos(ctx.comandos());
-            System.out.println("}");
+            System.out.println("}\n");
         } else {
-            //TODO: Falta implementar funcao
+            TabelaDeSimbolos escopoAtual = pt.topo();
+            String decTipo = visitTipo_estendido(ctx.tipo_estendido());
+            escopoAtual.adicionarSimbolo(ctx.IDENT().toString(),decTipo);
+            System.out.print(decTipo + " " + ctx.IDENT().toString() + " (");
+            System.out.print(visitParametros_opcional(ctx.parametros_opcional()));
+            System.out.println(") {");
+            visitDeclaracoes_locais(ctx.declaracoes_locais());
+            visitComandos(ctx.comandos());
+            System.out.println("}\n");
         }
         return null;
     }
@@ -383,7 +391,16 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                     + varParam
                             );
                             System.out.println(");");
-                        }else {
+                        } else if (varParamSplit[0].contains("(")){
+                            String sp3[] = varParamSplit[0].split("\\(");
+                            System.out.println("\tprintf("
+                                    + "\""
+                                    + tipoPrint(escopoAtual.getTipoSimbolo(sp3[0]))
+                                    + "\","
+                                    + varParamSplit[0]
+                                    + ");"
+                            );
+                        } else {
                             System.out.print("\tprintf(");
                             System.out.print(varParam);
                             System.out.println(");");
@@ -407,7 +424,6 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 System.out.println(");");
                                 i++;
                             }else if(varParamSplited[i].contains(".")){
-                                //System.out.println("AQUII!");
                                 String sp2[] = varParamSplited[i].split("\\.");
                                 System.out.println("\tprintf("
                                         + "\""
@@ -491,6 +507,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                         System.out.println("\t" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ";");
                     else
                         System.out.println("\tstrcpy(" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ");");
+                    break;
+                case 9:
+                    System.out.print("\treturn ");
+                    System.out.print(visitExpressao(ctx.expressao()));
+                    System.out.println(";");
                     break;
                 default:
                     break;
@@ -638,7 +659,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOp_multiplicacao(GrammarLAParser.Op_multiplicacaoContext ctx) {
-        return super.visitOp_multiplicacao(ctx);
+        return ctx.start.getText();
     }
 
     @Override
@@ -674,7 +695,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitOutros_fatores(GrammarLAParser.Outros_fatoresContext ctx) {
-        return super.visitOutros_fatores(ctx);
+        String ofConcat = "";
+        if (ctx.children != null) {
+            ofConcat += (visitOp_multiplicacao(ctx.op_multiplicacao()) == null?"":visitOp_multiplicacao(ctx.op_multiplicacao()));
+            ofConcat += visitFator(ctx.fator());
+            ofConcat += (visitOutros_fatores(ctx.outros_fatores()) == null?"":visitOutros_fatores(ctx.outros_fatores()));
+            return ofConcat;
+        } else
+            return null;
     }
 
     @Override
