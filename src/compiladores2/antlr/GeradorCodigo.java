@@ -79,8 +79,9 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     System.out.println("#define "+ ctx.IDENT() + " " + visitValor_constante(ctx.valor_constante())+"\n");
                     break;
                 case 2:
-                    //System.out.println("DEU RUIM!");
-                    //TODO: Falta implementar
+                    System.out.print("\ttypedef" + Character.toString((char) 127));
+                    visitTipo(ctx.tipo());
+                    System.out.println(ctx.IDENT().toString()+ ";");
                     break;
                 default:
                     break;
@@ -224,12 +225,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitTipo_basico_ident(GrammarLAParser.Tipo_basico_identContext ctx) {
         if(ctx.IDENT() != null){
-            //TODO: Falta implementar
+            return ctx.IDENT().toString();
         }
         else{
             return visitTipo_basico(ctx.tipo_basico());
         }
-        return null;
     }
 
     @Override
