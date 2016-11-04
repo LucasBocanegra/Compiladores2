@@ -184,8 +184,17 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
         visitDimensao(ctx.dimensao());
         visitOutros_ident(ctx.outros_ident());
 
-        if(!escopoAtual.existeSimbolo(ctx.IDENT().toString()) && ctx.outros_ident().name == null) {
+        if(ctx.outros_ident().name == null && !escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
+
             System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+
+        }else if(ctx.outros_ident().name != null){
+            String nameAtribuicao = ctx.IDENT().toString();
+            String campo1 = ctx.outros_ident().name;
+
+            if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao, campo1)) {
+                System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+            }
         }
         return null;
     }
@@ -411,6 +420,8 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     visitExpressao(ctx.expressao());
                     break;
                 case 6://faca
+                    visitComandos(ctx.comandos());
+                    visitExpressao(ctx.expressao());
                     break;
                 case 7: //atribuição de ponteiro
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
@@ -442,18 +453,24 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     }else {
 
                         visitChamada_atribuicao(ctx.chamada_atribuicao());
-
                         String tipoSimbolo = ctx.chamada_atribuicao().tipoSimbolo;
+
                         if (tipoAtribuicao.equals("registro")) {
                             String campo1 = ctx.chamada_atribuicao().outros_ident().name;
-                            if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao, campo1)) {
-                                System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
-                            } else {
-                                tipoAtribuicao = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
-                                if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
-                                    if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
-                                        System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
+                            if(campo1 != null){ //nao eh atribuicao de regitro para registro completo (ver caso de teste 12, linhas 20)
+                                if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao, campo1)) {
+                                    System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+                                } else {
+                                    tipoAtribuicao = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
+                                    if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
+                                        if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
+                                            System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
+                                        }
                                     }
+                                }
+                            }else{ // a variavel existe na tabela e eh um registro
+                                if(!tipoAtribuicao.equals("registro")){
+                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
                                 }
                             }
                         }else {
