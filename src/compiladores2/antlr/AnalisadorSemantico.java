@@ -4,6 +4,7 @@ import compiladores2.ASemantico.EntradaTabelaDeSimbolos;
 import compiladores2.ASemantico.PilhaDeTabelas;
 import compiladores2.ASemantico.TabelaDeSimbolos;
 import compiladores2.ASemantico.Tipo;
+import compiladores2.ASintatico.SaidaParser;
 
 /**
  * Created by lucas on 24/10/16.
@@ -11,6 +12,15 @@ import compiladores2.ASemantico.Tipo;
 public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
     private PilhaDeTabelas pt;
+    private SaidaParser out;
+
+    public AnalisadorSemantico(SaidaParser out) {
+        this.out = out;
+    }
+
+    public AnalisadorSemantico() {
+        out = null;
+    }
 
     @Override
     public String visitPrograma(GrammarLAParser.ProgramaContext ctx) {
@@ -20,7 +30,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
         visitDeclaracoes(ctx.declaracoes());
         visitCorpo(ctx.corpo());
-        System.out.println("Fim da compilacao");
+        out.println("Fim da compilacao");
         return null;
     }
 
@@ -57,7 +67,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())){
                         escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), visitTipo_basico(ctx.tipo_basico()));
                     }else{
-                        System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
+                        out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente");
                     }
                     visitValor_constante(ctx.valor_constante());
                     break;
@@ -86,7 +96,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                             escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
                         }
                     }else{
-                        System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
+                        out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente");
                     }
                     break;
                 default:
@@ -120,7 +130,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
             }
         }else{
-            System.out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente ");
+            out.println("Linha "+ ctx.getStart().getLine() +": identificador "+ ctx.IDENT().toString() +" ja declarado anteriormente");
         }
 
         //declara todas as mais_var com o tipo definido
@@ -158,7 +168,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     escopoAtual.adicionarSimbolo(m.IDENT().toString(), tipo, ctx.tipo().ehPonteiro);
                 }
             }else{
-                System.out.println("Linha "+ m.getStart().getLine() +": identificador "+ m.IDENT().toString() +" ja declarado anteriormente ");
+                out.println("Linha "+ m.getStart().getLine() +": identificador "+ m.IDENT().toString() +" ja declarado anteriormente");
             }
             m = m.mais_var();
         }
@@ -186,14 +196,14 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
         if(ctx.outros_ident().name == null && !escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
 
-            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+            out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
 
         }else if(ctx.outros_ident().name != null){
             String nameAtribuicao = ctx.IDENT().toString();
             String campo1 = ctx.outros_ident().name;
 
             if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao, campo1)) {
-                System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+                out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
             }
         }
         return null;
@@ -266,7 +276,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             return ctx.getText();
         }else{
             //TODO melhorar mensagem de saida
-            //System.out.println("Erro, tipo declarado não compatível com tipo básico");
+            //out.println("Erro, tipo declarado não compatível com tipo básico");
             return "undefined"; //tipo nao copativel
         }
     }
@@ -286,7 +296,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                 return ctx.IDENT().toString();
             }else{
                 //TODO melhorar mensagem de saida
-                System.out.println("Linha "+ctx.getStart().getLine()+": tipo "+ctx.IDENT().toString()+" nao declarado");
+                out.println("Linha "+ctx.getStart().getLine()+": tipo "+ctx.IDENT().toString()+" nao declarado");
                 return "undefined"; //tipo nao existente de variavel
             }
         }
@@ -425,7 +435,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     break;
                 case 7: //atribuição de ponteiro
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
-                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                        out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                     }else{
                         String nameAtribuicao = ctx.IDENT().toString();
                         String tipoAtribuicao = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
@@ -436,11 +446,11 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
                             if(tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)){
                                 if( !(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
-                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para ^" + nameAtribuicao);
+                                    out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para ^" + nameAtribuicao);
                                 }
                             }
                         }else{ // a variável atribuida nao eh ponteiro
-                            System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
+                            out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
                         }
                     }
                     break;
@@ -449,7 +459,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                     String tipoAtribuicao = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
 
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString()) || tipoAtribuicao == null) {
-                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                        out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                     }else {
 
                         visitChamada_atribuicao(ctx.chamada_atribuicao());
@@ -459,24 +469,24 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                             String campo1 = ctx.chamada_atribuicao().outros_ident().name;
                             if(campo1 != null){ //nao eh atribuicao de regitro para registro completo (ver caso de teste 12, linhas 20)
                                 if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao, campo1)) {
-                                    System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+                                    out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
                                 } else {
                                     tipoAtribuicao = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
                                     if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
                                         if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
-                                            System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
+                                            out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
                                         }
                                     }
                                 }
                             }else{ // a variavel existe na tabela e eh um registro
                                 if(!tipoAtribuicao.equals("registro")){
-                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
+                                    out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao +"."+campo1);
                                 }
                             }
                         }else {
                             if (tipoSimbolo.equals("error") || !tipoAtribuicao.equals(tipoSimbolo)) {
                                 if (!(tipoAtribuicao.equals("real") && tipoSimbolo.equals("inteiro"))) {
-                                    System.out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
+                                    out.println("Linha " + ctx.getStart().getLine() + ": atribuicao nao compativel para " + nameAtribuicao);
                                 }
                             }
                         }
@@ -684,7 +694,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             switch (ctx.tipoParcela){
                 case 0: // caso por penteiro
                     if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
-                        System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                        out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                     }else{
                         ctx.tipoSimbolo = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
                     }
@@ -699,13 +709,13 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
                         String campo1 = ctx.chamada_partes().outros_ident().IDENT().toString();
 
                         if (!escopoAtual.existeSimboloNoTipo(nameAtribuicao,campo1)) {
-                            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
+                            out.println("Linha " + ctx.getStart().getLine() + ": identificador " + nameAtribuicao + "." + campo1 + " nao declarado");
                         } else {
                             ctx.tipoSimbolo = escopoAtual.getTipoSimbolo(nameAtribuicao).getValorCampo(campo1);
                         }
                     }else{ //a variavel nao eh um registro
                         if(!escopoAtual.existeSimbolo(ctx.IDENT().toString())) {
-                            System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                            out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
                         }else{
                             ctx.tipoSimbolo = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
                         }
@@ -733,7 +743,7 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
             if(escopoAtual.existeSimbolo(ctx.IDENT().toString())){
                 ctx.tipoSimbolo = escopoAtual.getValorTipoSimbolo(ctx.IDENT().toString());
             }else{
-                System.out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
+                out.println("Linha " + ctx.getStart().getLine() + ": identificador " + ctx.IDENT().toString() + " nao declarado");
             }
         }else if(ctx.tipoParcela == 1){
             ctx.tipoSimbolo = "literal";
