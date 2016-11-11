@@ -25,13 +25,11 @@ public class Compiladores2 {
          SaidaParser out = new SaidaParser();
          File saidaCasoTeste = new File(args[1]);
          File entradaCasoTeste = new File(args[0]);
-         
+
          ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(entradaCasoTeste));
          GrammarLALexer lexer = new GrammarLALexer(input);
          CommonTokenStream tokens = new CommonTokenStream(lexer);
          GrammarLAParser parser = new GrammarLAParser(tokens);
-
-
 
          parser.addErrorListener(new T1ErrorListener(out));
          GrammarLAParser.ProgramaContext context = parser.programa();
@@ -46,5 +44,9 @@ public class Compiladores2 {
          pw.print(out.toString());
          pw.flush();
          pw.close();
+
+         AnalisadorSemantico semantico = new AnalisadorSemantico();
+         semantico.visitPrograma(context);
+
     }
 }

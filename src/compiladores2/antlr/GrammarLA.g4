@@ -59,9 +59,9 @@ valor_constante returns[int TipoConstante, String tipoSimbolo]:
 registro:
     'registro' variavel mais_variaveis 'fim_registro';
 
-declaracao_global:
-    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento'
-    | 'funcao' IDENT '(' parametros_opcional '):' tipo_estendido declaracoes_locais comandos 'fim_funcao';
+declaracao_global returns [int tipoGlob]:
+    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' {$tipoGlob=0;}
+    | 'funcao' IDENT '(' parametros_opcional '):' tipo_estendido declaracoes_locais comandos 'fim_funcao' {$tipoGlob=1;};
 
 parametros_opcional:
     parametro | ;
@@ -101,6 +101,10 @@ mais_expressao:
 
 senao_opcional:
     'senao' comandos | ;
+
+//Possivel conflito (palomino)
+//chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
+//    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
 
 chamada_atribuicao returns [String tipoSimbolo ]:
     '(' argumentos_opcional ')' | outros_ident dimensao '<-' expressao;
@@ -203,7 +207,7 @@ parcela_logica returns[String tipoSimbolo, int tipoParcela]:
     'verdadeiro' {$tipoParcela = 0;} | 'falso' {$tipoParcela = 1;} | exp_relacional { $tipoParcela = 2;};
 
 IDENT:
-    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_' )*;
+    ('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*;
 
 NUM_INT:
     '0'..'9'+;
