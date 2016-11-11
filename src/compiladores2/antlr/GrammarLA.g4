@@ -24,16 +24,16 @@ mais_var:
 identificador :
     ponteiros_opcionais IDENT dimensao outros_ident;
 
-ponteiros_opcionais :
+ponteiros_opcionais returns [boolean ehPonteiro]:
     '^' ponteiros_opcionais | ;
 
-outros_ident :
-    '.' identificador | ;
+outros_ident returns [String name] : //se entrar e não retornar nulo, significa que eh um registro
+    '.' IDENT | ; //mudança na gramática original, ao invés se chamar o indentificar chama diretamente o IDENT
 
 dimensao :
     '[' exp_aritmetica ']' dimensao | ;
 
-tipo:
+tipo returns [boolean ehPonteiro]:
     registro | tipo_estendido;
 
 mais_ident:
@@ -48,11 +48,13 @@ tipo_basico:
 tipo_basico_ident:
     tipo_basico | IDENT;
 
-tipo_estendido:
+tipo_estendido returns [boolean ehPonteiro]:
     ponteiros_opcionais tipo_basico_ident;
 
-valor_constante:
-    CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso';
+valor_constante returns[int TipoConstante, String tipoSimbolo]:
+    CADEIA {$TipoConstante = 0;} | NUM_INT{$TipoConstante = 1;} | NUM_REAL{$TipoConstante = 2;} |
+     'verdadeiro'{$TipoConstante = 3;} | 'falso'{$TipoConstante = 4;}
+     ;
 
 registro:
     'registro' variavel mais_variaveis 'fim_registro';
@@ -91,8 +93,8 @@ cmd returns [ int tipoCmd ]:
     | 'enquanto' expressao 'faca' comandos 'fim_enquanto' { $tipoCmd = 5; }
     | 'faca' comandos 'ate' expressao{ $tipoCmd = 6; }
     | '^' IDENT outros_ident dimensao '<-' expressao { $tipoCmd = 7; }
-    | IDENT chamada_atribuicao["undefined", "undefined"] { $tipoCmd = 8; }
-    | 'retorne' expressao { $tipoCmd = 9; }
+    | IDENT chamada_atribuicao { $tipoCmd = 8; }
+    | 'retorne' expressao { $tipoCmd = 10; }
 ;
 mais_expressao:
     ',' expressao mais_expressao | ;
@@ -100,8 +102,12 @@ mais_expressao:
 senao_opcional:
     'senao' comandos | ;
 
-chamada_atribuicao [String nameAtribuicao, String tipoAtribuicao]:
-    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
+//Possivel conflito (palomino)
+//chamada_atribuicao[String nameAtribuicao, String tipoAtribuicao]:
+//    '(' argumentos_opcional ')' | outros_ident dimensao '<-' exp=expressao;
+
+chamada_atribuicao returns [String tipoSimbolo ]:
+    '(' argumentos_opcional ')' | outros_ident dimensao '<-' expressao;
 
 argumentos_opcional:
     expressao mais_expressao | ;
@@ -166,7 +172,7 @@ parcela_nao_unario returns[String tipoSimbolo, int tipoParcela]:
 outras_parcelas returns[String tipoSimbolo]:
     '%' parcela outras_parcelas | ;
 
-chamada_partes:
+chamada_partes returns[boolean ehRegistro]:
     '(' expressao mais_expressao ')' | outros_ident dimensao | ;
 
 exp_relacional returns[String tipoSimbolo]:
@@ -210,11 +216,12 @@ NUM_REAL:
   '0'..'9'+ '.' '0'..'9'+;
 
 CADEIA:
-    '"' (~'\n')* '"';
+  '\'' ~('\n' | '\r' | '\'')* '\''
+  | '"' ~('\n' | '\r' | '"')* '"';
 
 WS:
     (' ' | '\n' | '\r' | '\t') -> skip;
 
 COMENTARIOS:
-    '{' ~('\n')* '}' -> skip;
+    '{' ~('\n')*  '}' -> skip;
 
