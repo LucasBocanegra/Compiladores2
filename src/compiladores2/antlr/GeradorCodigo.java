@@ -168,7 +168,9 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitOutros_ident(GrammarLAParser.Outros_identContext ctx) {
         if(ctx.children != null){
-            return "." + visitIdentificador(ctx.identificador());
+//            return "." + visitIdentificador(ctx.identificador());
+            //todo para funcionar  a regra semantica eh necessario mudar essa regra, logo nao existe identificador
+            return "." + ctx.IDENT().toString();
         }
         return null;
     }
@@ -383,7 +385,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
                     if(ctx.mais_expressao().children == null) {
                         if(escopoAtual.existeSimbolo(varParamSplit[0])){
-                            tipo = tipoPrint(escopoAtual.getTipoSimbolo(varParamSplit[0]));
+                            tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplit[0]));
                             System.out.print("\tprintf(");
                             System.out.print("\""
                                     + tipo
@@ -395,7 +397,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                             String sp3[] = varParamSplit[0].split("\\(");
                             System.out.println("\tprintf("
                                     + "\""
-                                    + tipoPrint(escopoAtual.getTipoSimbolo(sp3[0]))
+                                    + tipoPrint(escopoAtual.getValorTipoSimbolo(sp3[0]))
                                     + "\","
                                     + varParamSplit[0]
                                     + ");"
@@ -404,7 +406,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                             String sp3[] = varParamSplit[0].split("\\[");
                             System.out.println("\tprintf("
                                     + "\""
-                                    + tipoPrint(escopoAtual.getTipoSimbolo(sp3[0]))
+                                    + tipoPrint(escopoAtual.getValorTipoSimbolo(sp3[0]))
                                     + "\","
                                     + varParamSplit[0]
                                     + ");"
@@ -418,7 +420,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                         String varParamSplited[] = varParam.split(",");
                         for(int i = 0 ; i < varParamSplited.length ; i++) {
                             if (escopoAtual.existeSimbolo(varParamSplited[i])) {
-                                tipo = tipoPrint(escopoAtual.getTipoSimbolo(varParamSplited[i]));
+                                tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplited[i]));
                                 System.out.print("\tprintf(");
                                 System.out.print("\""
                                         + tipo
@@ -427,7 +429,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 );
                                 System.out.println(");");
                             }else if( i+1 < varParamSplited.length && escopoAtual.existeSimbolo(varParamSplited[i+1])){
-                                tipo = tipoPrint(escopoAtual.getTipoSimbolo(varParamSplited[i+1]));
+                                tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplited[i+1]));
                                 System.out.print("\tprintf(");
                                 System.out.print(varParamSplited[i].substring(0, varParamSplited[i].length()-1) + tipo + "\"," + varParamSplited[i+1] );
                                 System.out.println(");");
@@ -436,7 +438,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 String sp2[] = varParamSplited[i].split("\\.");
                                 System.out.println("\tprintf("
                                         + "\""
-                                        + tipoPrint(escopoAtual.getTipoSimbolo(sp2[1]))
+                                        + tipoPrint(escopoAtual.getValorTipoSimbolo(sp2[1]))
                                         + "\","
                                         + varParamSplited[i]
                                         + ");"
@@ -508,7 +510,8 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                 case 8:
                     String tipoVar = "";
                     try{
-                        tipoVar = escopoAtual.getTipoSimbolo(ctx.chamada_atribuicao().outros_ident().identificador().IDENT().toString());
+//                        tipoVar = escopoAtual.getValorTipoSimbolo(ctx.chamada_atribuicao().outros_ident().identificador().IDENT().toString());
+                        tipoVar = escopoAtual.getValorTipoSimbolo(ctx.chamada_atribuicao().outros_ident().IDENT().toString());
                     } catch (NullPointerException e){
 
                     }
@@ -560,7 +563,8 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             String tipoVar = "";
             String chamadaatribuicaoConcat = "";
             try{
-                tipoVar = escopoAtual.getTipoSimbolo(ctx.outros_ident().identificador().IDENT().toString());
+//                tipoVar = escopoAtual.getValorTipoSimbolo(ctx.outros_ident().identificador().IDENT().toString());
+                tipoVar = escopoAtual.getValorTipoSimbolo(ctx.outros_ident().IDENT().toString());
             } catch (NullPointerException e){
 
             }
