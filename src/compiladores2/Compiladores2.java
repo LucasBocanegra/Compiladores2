@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import compiladores2.ASintatico.SaidaParser;
 import compiladores2.ASintatico.T1ErrorListener;
 import compiladores2.antlr.AnalisadorSemantico;
+import compiladores2.antlr.GeradorCodigo;
 import compiladores2.antlr.GrammarLALexer;
 import compiladores2.antlr.GrammarLAParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -39,14 +40,16 @@ public class Compiladores2 {
               semantico.visitPrograma(context);
          }
 
+         if(!out.isModificado()){
+              GeradorCodigo geracao = new GeradorCodigo();
+              geracao.visitPrograma(context);
+         }
 
          PrintWriter pw = new PrintWriter(new FileWriter(saidaCasoTeste));
          pw.print(out.toString());
          pw.flush();
          pw.close();
 
-         AnalisadorSemantico semantico = new AnalisadorSemantico();
-         semantico.visitPrograma(context);
 
     }
 }
