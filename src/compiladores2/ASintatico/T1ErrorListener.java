@@ -22,19 +22,19 @@ public class T1ErrorListener implements ANTLRErrorListener {
         if (!sp.isModificado()) {
             if (tk.getText() == "<EOF>") {
                 sp.println("Linha " + i + ": erro sintatico proximo a EOF");
-                sp.println("Fim da compilacao");
+//                sp.println("Fim da compilacao");
             }
             else if (tk.getText().equals("\"") || tk.getText().equals("@") ){
                 sp.println("Linha " + i + tk.getText() + " - simbolo nao identificado");
-                sp.println("Fim da compilacao");
+//                sp.println("Fim da compilacao");
             }
             else if (tk.getText().equals("\"Houve colisao?\", colidiu) { escreve \"V\" ou \"F\"")){
                 sp.println("Linha " + i + ": erro sintatico proximo a \"Houve colisao?\"" );
-                sp.println("Fim da compilacao");
+//                sp.println("Fim da compilacao");
             }
             else{
                 sp.println("Linha " + i + ": erro sintatico proximo a " + tk.getText());
-                sp.println("Fim da compilacao");
+//                sp.println("Fim da compilacao");
             }
         }
     }
