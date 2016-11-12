@@ -38,11 +38,14 @@ public class Compiladores2 {
          if(!out.isModificado()){
               AnalisadorSemantico semantico = new AnalisadorSemantico(out);
               semantico.visitPrograma(context);
+
          }
 
          if(!out.isModificado()){
-              GeradorCodigo geracao = new GeradorCodigo();
+              GeradorCodigo geracao = new GeradorCodigo(out);
               geracao.visitPrograma(context);
+         }else{
+              out.println("Fim da compilacao");
          }
 
          PrintWriter pw = new PrintWriter(new FileWriter(saidaCasoTeste));

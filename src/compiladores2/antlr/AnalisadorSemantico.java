@@ -30,7 +30,6 @@ public class AnalisadorSemantico extends GrammarLABaseVisitor<String> {
 
         visitDeclaracoes(ctx.declaracoes());
         visitCorpo(ctx.corpo());
-        out.println("Fim da compilacao");
         return null;
     }
 

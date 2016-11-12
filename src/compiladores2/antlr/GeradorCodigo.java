@@ -2,6 +2,7 @@ package compiladores2.antlr;
 
 import compiladores2.ASemantico.PilhaDeTabelas;
 import compiladores2.ASemantico.TabelaDeSimbolos;
+import compiladores2.ASintatico.SaidaParser;
 
 /**
  * Created by Gabriel Palomino on 10/31/2016.
@@ -9,6 +10,11 @@ import compiladores2.ASemantico.TabelaDeSimbolos;
 public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     private PilhaDeTabelas pt;
+    private SaidaParser out;
+
+    public GeradorCodigo(SaidaParser out) {
+        this.out = out;
+    }
 
     public static String tipoPrint(String tipoPrint){
         String tipo;
@@ -28,7 +34,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
     @Override
     public String visitPrograma(GrammarLAParser.ProgramaContext ctx) {
-        System.out.println("#include <stdio.h>\n" +
+        out.println("#include <stdio.h>\n" +
                 "#include <stdlib.h>\n"
         );
 
@@ -37,11 +43,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
         visitDeclaracoes(ctx.declaracoes());
 
-        System.out.println("int main() {");
+        out.println("int main() {");
 
         visitCorpo(ctx.corpo());
 
-        System.out.println("\treturn 0;\n}");
+        out.println("\treturn 0;\n}");
 
         return null;
     }
@@ -76,12 +82,12 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     visitVariavel(ctx.variavel());
                     break;
                 case 1:
-                    System.out.println("#define "+ ctx.IDENT() + " " + visitValor_constante(ctx.valor_constante())+"\n");
+                    out.println("#define "+ ctx.IDENT() + " " + visitValor_constante(ctx.valor_constante())+"\n");
                     break;
                 case 2:
-                    System.out.print("\ttypedef" + Character.toString((char) 127));
+                    out.print("\ttypedef" + Character.toString((char) 127));
                     visitTipo(ctx.tipo());
-                    System.out.println(ctx.IDENT().toString()+ ";");
+                    out.println(ctx.IDENT().toString()+ ";");
                     break;
                 default:
                     break;
@@ -98,19 +104,19 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
         String TipoVar = visitTipo(ctx.tipo());
 
         if(!TipoVar.contains("*") && !TipoVar.contains("struct"))
-            System.out.print("\t" + TipoVar  + " ");
+            out.print("\t" + TipoVar  + " ");
         else if (TipoVar.contains("*")){
-            System.out.print("\t" + TipoVar.substring(1) + TipoVar.substring(0,1) + " " );
+            out.print("\t" + TipoVar.substring(1) + TipoVar.substring(0,1) + " " );
         }
         else if (TipoVar.contains("struct")){
-            System.out.print(TipoVar.replace("struct",""));
+            out.print(TipoVar.replace("struct",""));
             TipoVar = "struct";
         }
 
         if (!TipoVar.equals("char"))
             varsConcat += ctx.IDENT();
         else
-            System.out.print(ctx.IDENT()+"[80]");
+            out.print(ctx.IDENT()+"[80]");
 
         if(ctx.mais_var().children != null){
             varsConcat  += visitMais_var(ctx.mais_var());
@@ -120,11 +126,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             }
 
         }
-        System.out.print(varsConcat);
+        out.print(varsConcat);
         if(ctx.dimensao() != null) {
-            System.out.print((visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao())));
+            out.print((visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao())));
         }
-        System.out.println(";");
+        out.println(";");
 
         // Coloca na tabela de simbolos
         escopoAtual.adicionarSimbolo(ctx.IDENT().toString(), TipoVar);
@@ -253,11 +259,11 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitRegistro(GrammarLAParser.RegistroContext ctx) {
         if(ctx.children != null) {
-            System.out.println("\tstruct {");
+            out.println("\tstruct {");
             visitVariavel(ctx.variavel());
             visitMais_variaveis(ctx.mais_variaveis());
 
-            System.out.print("\t}");
+            out.print("\t}");
             return "struct ";
         }
         return null;
@@ -266,22 +272,22 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
     @Override
     public String visitDeclaracao_global(GrammarLAParser.Declaracao_globalContext ctx) {
         if(ctx.tipoGlob == 0){
-            System.out.print("void " + ctx.IDENT().toString() + "(");
-            System.out.print(visitParametros_opcional(ctx.parametros_opcional()));
-            System.out.println(") {");
+            out.print("void " + ctx.IDENT().toString() + "(");
+            out.print(visitParametros_opcional(ctx.parametros_opcional()));
+            out.println(") {");
             visitDeclaracoes_locais(ctx.declaracoes_locais());
             visitComandos(ctx.comandos());
-            System.out.println("}\n");
+            out.println("}\n");
         } else {
             TabelaDeSimbolos escopoAtual = pt.topo();
             String decTipo = visitTipo_estendido(ctx.tipo_estendido());
             escopoAtual.adicionarSimbolo(ctx.IDENT().toString(),decTipo);
-            System.out.print(decTipo + " " + ctx.IDENT().toString() + " (");
-            System.out.print(visitParametros_opcional(ctx.parametros_opcional()));
-            System.out.println(") {");
+            out.print(decTipo + " " + ctx.IDENT().toString() + " (");
+            out.print(visitParametros_opcional(ctx.parametros_opcional()));
+            out.println(") {");
             visitDeclaracoes_locais(ctx.declaracoes_locais());
             visitComandos(ctx.comandos());
-            System.out.println("}\n");
+            out.println("}\n");
         }
         return null;
     }
@@ -358,14 +364,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             switch(ctx.tipoCmd) {
                 case 0:
                     if (!escopoAtual.getTipoSimbolo(ctx.identificador().IDENT().toString()).equals("char")) {
-                        System.out.println("\tscanf(\""
+                        out.println("\tscanf(\""
                                 + ((escopoAtual.getTipoSimbolo(ctx.identificador().IDENT().toString()).equals("int"))?"%d":"%f")
                                 + "\",&"
                                 + ctx.identificador().IDENT().toString()
                                 + ");"
                         );
                     } else {
-                        System.out.println("\tgets("
+                        out.println("\tgets("
                                 + ctx.identificador().IDENT().toString()
                                 + ");"
                         );
@@ -386,16 +392,16 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                     if(ctx.mais_expressao().children == null) {
                         if(escopoAtual.existeSimbolo(varParamSplit[0])){
                             tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplit[0]));
-                            System.out.print("\tprintf(");
-                            System.out.print("\""
+                            out.print("\tprintf(");
+                            out.print("\""
                                     + tipo
                                     + "\","
                                     + varParam
                             );
-                            System.out.println(");");
+                            out.println(");");
                         } else if (varParamSplit[0].contains("(")){
                             String sp3[] = varParamSplit[0].split("\\(");
-                            System.out.println("\tprintf("
+                            out.println("\tprintf("
                                     + "\""
                                     + tipoPrint(escopoAtual.getValorTipoSimbolo(sp3[0]))
                                     + "\","
@@ -404,7 +410,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                             );
                         } else if (varParamSplit[0].contains("[")) {
                             String sp3[] = varParamSplit[0].split("\\[");
-                            System.out.println("\tprintf("
+                            out.println("\tprintf("
                                     + "\""
                                     + tipoPrint(escopoAtual.getValorTipoSimbolo(sp3[0]))
                                     + "\","
@@ -412,31 +418,31 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                     + ");"
                             );
                         } else {
-                            System.out.print("\tprintf(");
-                            System.out.print(varParam);
-                            System.out.println(");");
+                            out.print("\tprintf(");
+                            out.print(varParam);
+                            out.println(");");
                         }
                     }else{
                         String varParamSplited[] = varParam.split(",");
                         for(int i = 0 ; i < varParamSplited.length ; i++) {
                             if (escopoAtual.existeSimbolo(varParamSplited[i])) {
                                 tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplited[i]));
-                                System.out.print("\tprintf(");
-                                System.out.print("\""
+                                out.print("\tprintf(");
+                                out.print("\""
                                         + tipo
                                         + "\","
                                         + varParamSplited[i]
                                 );
-                                System.out.println(");");
+                                out.println(");");
                             }else if( i+1 < varParamSplited.length && escopoAtual.existeSimbolo(varParamSplited[i+1])){
                                 tipo = tipoPrint(escopoAtual.getValorTipoSimbolo(varParamSplited[i+1]));
-                                System.out.print("\tprintf(");
-                                System.out.print(varParamSplited[i].substring(0, varParamSplited[i].length()-1) + tipo + "\"," + varParamSplited[i+1] );
-                                System.out.println(");");
+                                out.print("\tprintf(");
+                                out.print(varParamSplited[i].substring(0, varParamSplited[i].length()-1) + tipo + "\"," + varParamSplited[i+1] );
+                                out.println(");");
                                 i++;
                             }else if(varParamSplited[i].contains(".")){
                                 String sp2[] = varParamSplited[i].split("\\.");
-                                System.out.println("\tprintf("
+                                out.println("\tprintf("
                                         + "\""
                                         + tipoPrint(escopoAtual.getValorTipoSimbolo(sp2[1]))
                                         + "\","
@@ -445,60 +451,60 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
                                 );
                             }
                             else{
-                                System.out.print("\tprintf(");
-                                System.out.print(varParamSplited[i]);
-                                System.out.println(");");
+                                out.print("\tprintf(");
+                                out.print(varParamSplited[i]);
+                                out.println(");");
                             }
                         }
 
                     }
                     break;
                 case 2:
-                    System.out.print("\tif (");
-                    System.out.print(visitExpressao(ctx.expressao()));
-                    System.out.println(") {");
-                    System.out.print("\t");
+                    out.print("\tif (");
+                    out.print(visitExpressao(ctx.expressao()));
+                    out.println(") {");
+                    out.print("\t");
                     visitComandos(ctx.comandos());
 
                     if(ctx.senao_opcional().children != null) {
-                        System.out.println("\t}");
-                        System.out.println("\telse {");
-                        System.out.print("\t");
+                        out.println("\t}");
+                        out.println("\telse {");
+                        out.print("\t");
                         visitSenao_opcional(ctx.senao_opcional());
                     }
 
-                    System.out.println("\t}");
+                    out.println("\t}");
                     break;
                 case 3:
-                    System.out.print("\tswitch (");
-                    System.out.print(visitExp_aritmetica(ctx.exp_aritmetica(0)));
-                    System.out.println(") {");
+                    out.print("\tswitch (");
+                    out.print(visitExp_aritmetica(ctx.exp_aritmetica(0)));
+                    out.println(") {");
                     visitSelecao(ctx.selecao());
                     if(ctx.senao_opcional().children != null) {
-                        System.out.println("\tdefault:");
-                        System.out.print("\t");
+                        out.println("\tdefault:");
+                        out.print("\t");
                         visitSenao_opcional(ctx.senao_opcional());
                     }
-                    System.out.println("\t}");
+                    out.println("\t}");
                     break;
                 case 4:
-                    System.out.println("\tfor (" + ctx.IDENT() +" = " +visitExp_aritmetica(ctx.exp_aritmetica(0)) + "; " + ctx.IDENT().toString() + " <= " + visitExp_aritmetica(ctx.exp_aritmetica(1)) + "; " +ctx.IDENT().toString() +"++) {");
+                    out.println("\tfor (" + ctx.IDENT() +" = " +visitExp_aritmetica(ctx.exp_aritmetica(0)) + "; " + ctx.IDENT().toString() + " <= " + visitExp_aritmetica(ctx.exp_aritmetica(1)) + "; " +ctx.IDENT().toString() +"++) {");
                     visitComandos(ctx.comandos());
-                    System.out.println("\t}");
+                    out.println("\t}");
 
                     break;
                 case 5:
-                    System.out.println("\twhile (" + visitExpressao(ctx.expressao()) + ") {");
+                    out.println("\twhile (" + visitExpressao(ctx.expressao()) + ") {");
                     visitComandos(ctx.comandos());
-                    System.out.println("}");
+                    out.println("}");
                     break;
                 case 6:
-                    System.out.println("\tdo {");
+                    out.println("\tdo {");
                     visitComandos(ctx.comandos());
-                    System.out.println("\t} while(" + visitExpressao(ctx.expressao())+");");
+                    out.println("\t} while(" + visitExpressao(ctx.expressao())+");");
                     break;
                 case 7:
-                    System.out.println("\t*"+ctx.IDENT().toString() +
+                    out.println("\t*"+ctx.IDENT().toString() +
                             (visitOutros_ident(ctx.outros_ident()) == null?"":visitOutros_ident(ctx.outros_ident()))
                             + (visitDimensao(ctx.dimensao()) == null?"":visitDimensao(ctx.dimensao()))
                             +" = "
@@ -516,14 +522,14 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
 
                     }
                     if(!tipoVar.equals("char"))
-                        System.out.println("\t" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ";");
+                        out.println("\t" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ";");
                     else
-                        System.out.println("\tstrcpy(" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ");");
+                        out.println("\tstrcpy(" + ctx.IDENT().toString() + visitChamada_atribuicao(ctx.chamada_atribuicao()) + ");");
                     break;
                 case 9:
-                    System.out.print("\treturn ");
-                    System.out.print(visitExpressao(ctx.expressao()));
-                    System.out.println(";");
+                    out.print("\treturn ");
+                    out.print(visitExpressao(ctx.expressao()));
+                    out.println(";");
                     break;
                 default:
                     break;
@@ -608,12 +614,12 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
         String Constantes[] = visitConstantes(ctx.constantes()).split("\\.\\.");
         if(Constantes.length > 1)
             for(int i = Integer.parseInt(Constantes[0]); i <= Integer.parseInt(Constantes[1]); i++)
-                System.out.println("\tcase " + i + ":");
+                out.println("\tcase " + i + ":");
         else
-            System.out.println("\tcase " + Constantes[0] + ":");
-        System.out.print("\t");
+            out.println("\tcase " + Constantes[0] + ":");
+        out.print("\t");
         visitComandos(ctx.comandos());
-        System.out.println("\t\tbreak;");
+        out.println("\t\tbreak;");
         visitMais_selecao(ctx.mais_selecao());
         return null;
     }
@@ -726,7 +732,7 @@ public class GeradorCodigo extends GrammarLABaseVisitor<String>{
             String parConcat = (visitOp_unario(ctx.op_unario()) == null?"": visitOp_unario(ctx.op_unario()))
                     + (visitParcela_unario(ctx.parcela_unario()) == null?"":visitParcela_unario(ctx.parcela_unario())
             );
-            //System.out.println(parConcat);
+            //out.println(parConcat);
             return parConcat;
         }
     }

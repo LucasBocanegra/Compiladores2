@@ -75,9 +75,11 @@ public class TabelaDeSimbolos {
     public boolean existeSimboloNoTipo(String nameAtribuicao, String campo1){
         for(EntradaTabelaDeSimbolos etds:simbolos) {
             if(etds.getNome().equals(nameAtribuicao)) {
-                for(String k : etds.getTipo().getCampos().keySet()){
-                    if(k.equals(campo1)){
-                        return true;
+                if(!etds.getTipo().getValor().equals("registro")){
+                    for(String k : etds.getTipo().getCampos().keySet()){
+                        if(k.equals(campo1)){
+                            return true;
+                        }
                     }
                 }
             }

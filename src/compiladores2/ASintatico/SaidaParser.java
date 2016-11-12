@@ -19,6 +19,10 @@ public class SaidaParser {
         conteudo.append(texto);
         conteudo.append("\n");
     }
+
+    public void print(String texto) {
+        conteudo.append(texto);
+    }
     
     public boolean isModificado() {
         return modificado;

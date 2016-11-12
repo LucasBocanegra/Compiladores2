@@ -33,26 +33,26 @@ public class CorrigirGeracao {
             Arrays.sort(casosTeste);
             for (File casoTeste : casosTeste) {
 
-                ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(casoTeste));
-                GrammarLALexer lexer = new GrammarLALexer(input);
-                CommonTokenStream tokens = new CommonTokenStream(lexer);
-                GrammarLAParser parser = new GrammarLAParser(tokens);
-                GrammarLAParser.ProgramaContext context = parser.programa();
-                GeradorCodigo geracao = new GeradorCodigo();
-
-                System.out.println("================================================================================");
-                System.out.println(casoTeste.getName());
-                System.out.println("--------------------------------------------------------------------------------");
-
-                geracao.visitPrograma(context);
-
-                System.out.println("############################### ESPERADO (ORIGINAL) ##############################");
-                List<String> out = Files.readAllLines(Paths.get(CAMINHO_CASOS_SAIDA+"/"+casoTeste.getName()+".c"), StandardCharsets.UTF_8);
-                for (String t : out){
-                    System.out.println(t);
-                }
-
-                System.out.println("\n");
+//                ANTLRInputStream input = new ANTLRInputStream(new FileInputStream(casoTeste));
+//                GrammarLALexer lexer = new GrammarLALexer(input);
+//                CommonTokenStream tokens = new CommonTokenStream(lexer);
+//                GrammarLAParser parser = new GrammarLAParser(tokens);
+//                GrammarLAParser.ProgramaContext context = parser.programa();
+////                GeradorCodigo geracao = new GeradorCodigo(out);
+//
+//                System.out.println("================================================================================");
+//                System.out.println(casoTeste.getName());
+//                System.out.println("--------------------------------------------------------------------------------");
+//
+//                geracao.visitPrograma(context);
+//
+//                System.out.println("############################### ESPERADO (ORIGINAL) ##############################");
+//                List<String> out = Files.readAllLines(Paths.get(CAMINHO_CASOS_SAIDA+"/"+casoTeste.getName()+".c"), StandardCharsets.UTF_8);
+//                for (String t : out){
+//                    System.out.println(t);
+//                }
+//
+//                System.out.println("\n");
             }
         }
     }
